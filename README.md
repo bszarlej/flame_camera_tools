@@ -100,6 +100,6 @@ camera
 Multiple effects at once:
 
 ```dart
-    camera.shake(duration: const Duration(seconds: 4), intensity:7);
-    camera.zoomTo(0.75, duration: const Duration(seconds: 2));
+camera.shake(duration: const Duration(seconds: 4), intensity:7);
+camera.zoomTo(0.75, duration: const Duration(seconds: 2));
 ```
