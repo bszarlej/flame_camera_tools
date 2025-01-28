@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame_camera_tools/behaviors/smooth_follow_behavior.dart';
@@ -87,11 +86,7 @@ extension CameraComponentTools on CameraComponent {
     Duration duration = const Duration(seconds: 0),
     Curve curve = Curves.linear,
   }) {
-    for (final child in viewfinder.children) {
-      if (child is FollowBehavior) {
-        child.removeFromParent();
-      }
-    }
+    stop();
 
     final completer = Completer();
 
