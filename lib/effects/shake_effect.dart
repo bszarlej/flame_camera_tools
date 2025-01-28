@@ -5,11 +5,13 @@ import 'package:flame/extensions.dart';
 
 class ShakeEffect extends MoveEffect {
   final double intensity;
+  final bool weakenOverTime;
 
   ShakeEffect(
     EffectController controller, {
     PositionProvider? target,
     required this.intensity,
+    this.weakenOverTime = true,
     super.onComplete,
     super.key,
   }) : super(controller, target);
@@ -19,11 +21,12 @@ class ShakeEffect extends MoveEffect {
   @override
   void apply(double progress) {
     if (isShaking) {
-      final dampenedIntensity = intensity * (1.0 - progress);
+      final finalIntensity =
+          weakenOverTime ? intensity * (1.0 - progress) : intensity;
 
       final offset = Vector2(
-        _random.nextDouble() * dampenedIntensity - dampenedIntensity / 2,
-        _random.nextDouble() * dampenedIntensity - dampenedIntensity / 2,
+        _random.nextDouble() * finalIntensity - finalIntensity / 2,
+        _random.nextDouble() * finalIntensity - finalIntensity / 2,
       );
 
       target.position = offset..add(target.position);
