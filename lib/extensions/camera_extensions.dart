@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame_camera_tools/behaviors/smooth_follow_behavior.dart';
@@ -24,21 +26,33 @@ extension CameraComponentTools on CameraComponent {
     if (snap) viewfinder.position = target.position;
   }
 
-  void shake({required double duration, required double intensity}) {
+  Future<void> shake({
+    required Duration duration,
+    required double intensity,
+    Curve curve = Curves.linear,
+  }) {
     for (final child in viewfinder.children) {
       if (child is ShakeEffect) child.removeFromParent();
     }
+    final completer = Completer();
+
     viewfinder.add(
       ShakeEffect(
-        EffectController(duration: duration),
+        EffectController(
+          duration: duration.inMicroseconds / 1000000,
+          curve: curve,
+        ),
         intensity: intensity,
+        onComplete: () => completer.complete(),
       ),
     );
+
+    return completer.future;
   }
 
-  void zoomTo(
+  Future<void> zoomTo(
     double value, {
-    double duration = 0,
+    Duration duration = const Duration(seconds: 0),
     Curve curve = Curves.linear,
   }) {
     assert(value > 0, 'zoom level must be positive: $value');
@@ -47,41 +61,61 @@ extension CameraComponentTools on CameraComponent {
       if (child is ScaleEffect) child.removeFromParent();
     }
 
-    if (duration == 0) {
+    final completer = Completer();
+
+    if (duration == Duration.zero) {
       viewfinder.zoom = value;
     } else {
       viewfinder.add(
         ScaleEffect.to(
           Vector2.all(value),
-          EffectController(duration: duration, curve: curve),
+          EffectController(
+            duration: duration.inMicroseconds / 1000000,
+            curve: curve,
+          ),
+          onComplete: () => completer.complete(),
         ),
       );
     }
+
+    return completer.future;
   }
 
-  void focusOn(
+  Future<void> focusOn(
     Vector2 targetPosition, {
-    double duration = 0,
+    Duration duration = const Duration(seconds: 0),
     Curve curve = Curves.linear,
   }) {
     stop();
-    if (duration == 0) {
+
+    final completer = Completer();
+
+    if (duration == Duration.zero) {
       viewfinder.position = targetPosition;
     } else {
       viewfinder.add(
         MoveToEffect(
           targetPosition,
-          EffectController(duration: duration, curve: curve),
+          EffectController(
+            duration: duration.inMicroseconds / 1000000,
+            curve: curve,
+          ),
+          onComplete: () => completer.complete(),
         ),
       );
     }
+    return completer.future;
   }
 
-  void focusOnComponent(
+  Future<void> focusOnComponent(
     ReadOnlyPositionProvider target, {
-    double duration = 0,
+    Duration duration = const Duration(seconds: 0),
     Curve curve = Curves.linear,
   }) {
-    focusOn(target.position, duration: duration, curve: curve);
+    return focusOn(
+      target.position,
+      duration: duration,
+      curve: curve,
+    );
   }
 }
