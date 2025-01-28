@@ -31,9 +31,10 @@ extension FlameCameraTools on CameraComponent {
     required double intensity,
     Curve curve = Curves.linear,
   }) {
-    for (final child in viewfinder.children) {
+    viewfinder.children.toList().forEach((child) {
       if (child is ShakeEffect) child.removeFromParent();
-    }
+    });
+
     final completer = Completer();
 
     viewfinder.add(
@@ -57,9 +58,9 @@ extension FlameCameraTools on CameraComponent {
   }) {
     assert(value > 0, 'zoom level must be positive: $value');
 
-    for (final child in viewfinder.children) {
+    viewfinder.children.toList().forEach((child) {
       if (child is ScaleEffect) child.removeFromParent();
-    }
+    });
 
     final completer = Completer();
 
