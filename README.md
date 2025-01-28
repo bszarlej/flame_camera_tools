@@ -31,7 +31,7 @@ In the future, this package will also be published on [pub.dev](https://pub.dev/
 - Every effect can be customized with a duration and a curve
 - Possibility to chain effects using futures
 
-## CameraComponent Extension Methods
+### CameraComponent Extension Methods
 - smoothFollow() - Smoothly follows a ReadOnlyPositionProvider with a specified stiffness
 - shake() - Shakes the camera
 - zoomTo() - Zooms in or out
