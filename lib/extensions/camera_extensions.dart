@@ -6,7 +6,7 @@ import 'package:flame_camera_tools/behaviors/smooth_follow_behavior.dart';
 import 'package:flame_camera_tools/effects/shake_effect.dart';
 import 'package:flutter/widgets.dart';
 
-extension CameraComponentTools on CameraComponent {
+extension FlameCameraTools on CameraComponent {
   void smoothFollow(
     ReadOnlyPositionProvider target, {
     double stiffness = double.infinity,
