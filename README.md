@@ -4,13 +4,13 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 
 ## Installation
 
-At the moment you can add this package via [Github](https://github.com/Bartekdevv/flame_camera_tools.git) by adding the following to your `pubspec.yaml` file:
+At the moment you can add this package via [Github](https://github.com/bszarlej/flame_camera_tools.git) by adding the following to your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
   flame_camera_tools:
     git:
-      url: https://github.com/Bartekdevv/flame_camera_tools.git
+      url: https://github.com/bszarlej/flame_camera_tools.git
       ref: master
 ```
 
