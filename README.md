@@ -105,8 +105,9 @@ camera
 Applying Multiple Effects at Once:
 
 ```dart
-camera.shake(duration: const Duration(seconds: 4), intensity:7);
-camera.zoomTo(0.75, duration: const Duration(seconds: 2));
+camera
+  ..shake(duration: const Duration(seconds: 4), intensity: 7)
+  ..zoomTo(0.75, duration: const Duration(seconds: 2));
 ```
 
 # Why Use This Package?
