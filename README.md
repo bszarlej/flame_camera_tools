@@ -2,32 +2,6 @@
 
 flame_camera_tools is a Flutter package that enhances camera functionality for games built with Flame. It provides a intuitive way to manage camera behavior, making it easier to create dynamic and immersive experiences in 2D game worlds.
 
-## Installation
-
-At the moment you can add this package via [Github](https://github.com/bszarlej/flame_camera_tools.git) by adding the following to your `pubspec.yaml` file:
-
-```yaml
-dependencies:
-  flame_camera_tools:
-    git:
-      url: https://github.com/bszarlej/flame_camera_tools.git
-      ref: master
-```
-
-Or, if you prefer to clone the repository directly and use it locally, add it like this:
-```yaml
-dependencies:
-  flame_camera_tools:
-    path: /path/to/this/package/flame_camera_tools/
-```
-Then, run:
-
-```sh
-flutter pub get
-```
----
-In the future, this package will also be published on [pub.dev](https://pub.dev/), the official package repository for Dart and Flutter.
-
 # Features
 - Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance.
 - Shake Effect: Apply a shake effect to any PositionProvider.
@@ -51,7 +25,7 @@ Import the package like this:
 import 'package:flame_camera_tools/flame_camera_tools.dart';
 ```
 
-Instantiate you camera component:
+Instantiate you camera component using Flame:
 
 ```dart
 final camera = CameraComponent();
