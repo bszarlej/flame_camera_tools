@@ -3,7 +3,7 @@
 flame_camera_tools is a Flutter package that enhances camera functionality for games built with Flame. It provides a intuitive way to manage camera behavior, making it easier to create dynamic and immersive experiences in 2D game worlds.
 
 <a title="Pub" href="https://pub.dev/packages/flame_camera_tools" ><img src="https://img.shields.io/pub/v/flame_camera_tools.svg?style=popout" /></a>
-![Pub Points](https://img.shields.io/pub/points/flame_camera_tools)
+<a title="Pub Points" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/points/flame_camera_tools.svg?style=popout" /></a>
 
 # Features
 - Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance.

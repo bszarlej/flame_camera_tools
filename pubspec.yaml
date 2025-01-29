@@ -1,6 +1,6 @@
 name: flame_camera_tools
 description: "Intuitive tools for creating immersive and dynamic camera behaviors in Flame-based games."
-version: 0.0.2+2
+version: 0.0.3
 repository: https://github.com/bszarlej/flame_camera_tools.git
 
 environment:
