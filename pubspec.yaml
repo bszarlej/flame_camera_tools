@@ -1,6 +1,6 @@
 name: flame_camera_tools
 description: "Inituitive camera management for Flame."
-version: 0.0.2
+version: 0.0.2+1
 repository: https://github.com/bszarlej/flame_camera_tools.git
 
 environment:
