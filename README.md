@@ -4,40 +4,41 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 
 # Features
 - Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance.
+- Area Follow: The camera follows a target component only after the target moves outside a specified rectangular area. This is useful for creating "dead zones" where the camera does not immediately follow the target.
 - Shake Effect: Apply a shake effect to any PositionProvider.
 - Zooming: Zoom in or out with customizable durations.
 - Focus Effects: Focus the camera on a position or component.
 - Customizable Effects: Modify the duration and curve of each effect.
 - Chaining Effects: Seamlessly chain multiple effects using Futures.
-  
-## CameraComponent Extension Methods
-- smoothFollow() – Smoothly follows a ReadOnlyPositionProvider with adjustable stiffness.
-- shake() – Apply a shake effect to the camera.
-- zoomTo() – Zoom in or out with a customizable duration and curve.
-- focusOn() – Focus on a particular position in the world.
-- focusOnComponent() – Focus on a specific component.
 
 ## Usage
 
-Import the package like this:
+You can either instantiate your own CameraComponent directly or use the camera provided by the FlameGame class:
 
 ```dart
-import 'package:flame_camera_tools/flame_camera_tools.dart';
-```
-
-Instantiate you camera component using Flame:
-
-```dart
+// Directly instantiate the CameraComponent
 final camera = CameraComponent();
 ```
 
-Follow a Component:
+```dart
+// Accessing the camera from FlameGame
+final camera = game.camera;
+```
+
+### Follow a Component
+Use `smoothFollow()` to make the camera smoothly follow a component with adjustable stiffness:
 
 ```dart
 camera.smoothFollow(component, stiffness: 5);
 ```
 
-Apply a Shake Effect:
+Use `areaFollow()` to make the camera follow a component only once it moves outside a defined rectangular area:
+
+```dart
+camera.areaFollow(component, areaBounds: const Rect.fromLTRB(100, 100, 100, 100));
+```
+### Apply a Shake Effect
+Create a shake effect with a specific duration, intensity, and easing curve:
 
 ```dart
 camera.shake(
@@ -47,7 +48,9 @@ camera.shake(
 );
 ```
 
-Zoom Out:
+### Zooming in/out
+
+Zoom in/out with customizable zoom level, duration, and curve:
 
 ```dart
 camera.zoomTo(
@@ -56,7 +59,19 @@ camera.zoomTo(
   curve: Curves.linear,
 );
 ```
-Focus on a Component:
+### Focusing the Camera
+
+Move the camera to focus on a position, with optional duration and easing:
+
+```dart
+camera.focusOn(
+  Vector2(100, 100),
+  duration: const Duration(seconds: 3),
+  curve: Curves.linear,
+);
+```
+
+Move the camera to focus on a component, with optional duration and easing:
 
 ```dart
 camera.focusOnComponent(
@@ -66,7 +81,8 @@ camera.focusOnComponent(
 );
 ```
 
-Chaining Multiple Effects:
+### Chaining Multiple Effects
+You can chain multiple effects together for a sequence of camera movements:
 
 ```dart
 camera
@@ -76,7 +92,8 @@ camera
     .then((_) => camera.zoomTo(1.0, duration: const Duration(seconds: 2)));
 ```
 
-Applying Multiple Effects at Once:
+### Applying Multiple Effects at Once
+You can also apply multiple effects simultaneously for more dynamic interactions:
 
 ```dart
 camera

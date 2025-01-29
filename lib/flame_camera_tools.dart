@@ -1,5 +1,6 @@
 library;
 
-export 'behaviors/smooth_follow_behavior.dart';
-export 'effects/shake_effect.dart';
-export 'extensions/camera_extensions.dart';
+export 'src/behaviors/smooth_follow_behavior.dart';
+export 'src/behaviors/area_follow_behavior.dart';
+export 'src/effects/shake_effect.dart';
+export 'src/extensions/camera_extensions.dart';
