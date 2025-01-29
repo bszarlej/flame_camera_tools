@@ -1,3 +1,7 @@
+## 0.0.5+1
+
+* fix: use `radians()` also when the duration is zero
+
 ## 0.0.5
 
 * Added `rotateBy()` method for CameraComponent

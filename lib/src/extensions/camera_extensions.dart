@@ -165,7 +165,7 @@ extension FlameCameraTools on CameraComponent {
     final completer = Completer();
 
     if (duration == Duration.zero) {
-      viewfinder.angle = angle;
+      viewfinder.angle = radians(angle);
     } else {
       viewfinder.add(
         RotateEffect.by(
