@@ -48,14 +48,14 @@ extension FlameCameraTools on CameraComponent {
   /// Parameters:
   /// - [target]: The position provider to follow.
   /// - [areaBounds]: The rectangular area that defines when the camera should follow the target.
-  /// - [stiffness]: The responsiveness of the camera's movement.
+  /// - [maxSpeed]: Maximum speed of the camera.
   /// - [horizontalOnly]: If true, restricts the following behavior to the horizontal axis.
   /// - [verticalOnly]: If true, restricts the following behavior to the vertical axis.
   /// - [snap]: If true, the camera will immediately align with the target's position before following.
   void areaFollow(
     ReadOnlyPositionProvider target, {
     required Rect areaBounds,
-    double stiffness = double.infinity,
+    double maxSpeed = double.infinity,
     bool horizontalOnly = false,
     bool verticalOnly = false,
     bool snap = false,
@@ -65,6 +65,7 @@ extension FlameCameraTools on CameraComponent {
       AreaFollowBehavior(
         target: target,
         areaBounds: areaBounds,
+        maxSpeed: maxSpeed,
         horizontalOnly: horizontalOnly,
         verticalOnly: verticalOnly,
       ),

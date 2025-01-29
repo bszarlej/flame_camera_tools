@@ -18,6 +18,7 @@ class AreaFollowBehavior extends FollowBehavior {
     required super.target,
     required this.areaBounds,
     super.owner,
+    super.maxSpeed,
     super.horizontalOnly,
     super.verticalOnly,
     super.key,
@@ -54,6 +55,12 @@ class AreaFollowBehavior extends FollowBehavior {
       }
     }
 
+    final distance = _tempDelta.length;
+    final deltaOffset = maxSpeed * dt;
+
+    if (distance > deltaOffset) {
+      _tempDelta.scale(deltaOffset / distance);
+    }
     if (!_tempDelta.isZero()) owner.position += _tempDelta;
   }
 }

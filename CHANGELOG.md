@@ -1,3 +1,8 @@
+## 0.0.4
+
+* Removed `stiffness` parameter from `areaFollow()`
+* Added `maxSpeed` parameter to `areaFolow()` and `AreaFollowBehavior`
+
 ## 0.0.3
 
 ## 0.0.2
