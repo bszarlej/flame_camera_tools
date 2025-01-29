@@ -88,9 +88,7 @@ extension FlameCameraTools on CameraComponent {
     required double intensity,
     Curve curve = Curves.linear,
   }) {
-    viewfinder.children.toList().forEach((child) {
-      if (child is ShakeEffect) child.removeFromParent();
-    });
+    _removeEffects<ShakeEffect>();
 
     final completer = Completer();
 
@@ -122,9 +120,7 @@ extension FlameCameraTools on CameraComponent {
   }) {
     assert(value > 0, 'zoom level must be positive: $value');
 
-    viewfinder.children.toList().forEach((child) {
-      if (child is ScaleEffect) child.removeFromParent();
-    });
+    _removeEffects<ScaleEffect>();
 
     final completer = Completer();
 
@@ -158,9 +154,7 @@ extension FlameCameraTools on CameraComponent {
     Duration duration = Duration.zero,
     Curve curve = Curves.linear,
   }) {
-    viewfinder.children.toList().forEach((child) {
-      if (child is RotateEffect) child.removeFromParent();
-    });
+    _removeEffects<RotateEffect>();
 
     final completer = Completer();
 
@@ -228,6 +222,14 @@ extension FlameCameraTools on CameraComponent {
       target.position,
       duration: duration,
       curve: curve,
+    );
+  }
+
+  void _removeEffects<T>() {
+    viewfinder.children.toList().forEach(
+      (child) {
+        if (child is T) child.removeFromParent();
+      },
     );
   }
 }
