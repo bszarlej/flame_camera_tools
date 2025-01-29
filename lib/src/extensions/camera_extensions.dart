@@ -117,7 +117,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the zoom effect.
   Future<void> zoomTo(
     double value, {
-    Duration duration = const Duration(seconds: 0),
+    Duration duration = Duration.zero,
     Curve curve = Curves.linear,
   }) {
     assert(value > 0, 'zoom level must be positive: $value');
@@ -146,6 +146,41 @@ extension FlameCameraTools on CameraComponent {
     return completer.future;
   }
 
+  /// Rotates the camera by the given [angle],
+  /// with an optional duration and easing curve.
+  ///
+  /// Parameters:
+  /// - [angle]: The angle to rotate the camera to.
+  /// - [duration]: The duration over which the rotation should occur.
+  /// - [curve]: The easing curve to apply during the rotation.
+  Future<void> rotateBy(
+    double angle, {
+    Duration duration = Duration.zero,
+    Curve curve = Curves.linear,
+  }) {
+    viewfinder.children.toList().forEach((child) {
+      if (child is RotateEffect) child.removeFromParent();
+    });
+
+    final completer = Completer();
+
+    if (duration == Duration.zero) {
+      viewfinder.angle = angle;
+    } else {
+      viewfinder.add(
+        RotateEffect.by(
+          radians(angle),
+          EffectController(
+            duration: duration.inMicroseconds / 1000000,
+            curve: curve,
+          ),
+          onComplete: () => completer.complete(),
+        ),
+      );
+    }
+    return completer.future;
+  }
+
   /// Moves the camera to focus on a specific target position.
   ///
   /// Parameters:
@@ -154,7 +189,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the movement.
   Future<void> focusOn(
     Vector2 targetPosition, {
-    Duration duration = const Duration(seconds: 0),
+    Duration duration = Duration.zero,
     Curve curve = Curves.linear,
   }) {
     stop();
@@ -186,7 +221,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the movement.
   Future<void> focusOnComponent(
     ReadOnlyPositionProvider target, {
-    Duration duration = const Duration(seconds: 0),
+    Duration duration = Duration.zero,
     Curve curve = Curves.linear,
   }) {
     return focusOn(

@@ -10,6 +10,7 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 - Area Follow: The camera follows a target component only after the target moves outside a specified rectangular area. This is useful for creating "dead zones" where the camera does not immediately follow the target.
 - Shake Effect: Apply a shake effect to any PositionProvider.
 - Zooming: Zoom in or out with customizable durations.
+- Rotating: Rotate the camera by an angle.
 - Focus Effects: Focus the camera on a position or component.
 - Customizable Effects: Modify the duration and curve of each effect.
 - Chaining Effects: Seamlessly chain multiple effects using Futures.
@@ -62,6 +63,20 @@ camera.zoomTo(
   curve: Curves.linear,
 );
 ```
+
+### Rotating
+
+Rotate the camera by an angle
+
+```dart
+// Rotates the camera by 45°
+camera.rotateBy(
+  45,
+  duration: const Duration(seconds: 3),
+  curve: Curves.linear,
+);
+```
+
 ### Focusing the Camera
 
 Move the camera to focus on a position, with optional duration and easing:
@@ -101,7 +116,8 @@ You can also apply multiple effects simultaneously for more dynamic interactions
 ```dart
 camera
   ..shake(duration: const Duration(seconds: 4), intensity: 7)
-  ..zoomTo(0.75, duration: const Duration(seconds: 2));
+  ..zoomTo(0.75, duration: const Duration(seconds: 2))
+  ..rotateBy(90, duration: const Duration(seconds: 2), curve: Curves.easeInOut);
 ```
 
 # Why Use This Package?

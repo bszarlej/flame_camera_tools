@@ -1,3 +1,8 @@
+## 0.0.5
+
+* Added `rotateBy()` method for CameraComponent
+* Refactor method parameter defaults
+
 ## 0.0.4
 
 * Removed `stiffness` parameter from `areaFollow()`
