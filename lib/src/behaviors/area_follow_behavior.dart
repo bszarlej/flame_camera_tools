@@ -29,7 +29,7 @@ class AreaFollowBehavior extends FollowBehavior {
           areaBounds.top >= 0 &&
           areaBounds.right >= 0 &&
           areaBounds.bottom >= 0,
-      'Bounds must define a valid rectangular region.',
+      'Invalid Bounds: All values must be non-negative.',
     );
   }
 
