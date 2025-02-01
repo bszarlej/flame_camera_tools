@@ -1,3 +1,8 @@
+## 1.0.0
+
+* Added `weakenOverTime` parameter to `shake()` method
+* Using `double` instead of the `Duration` class for the duration of the effects
+
 ## 0.0.5+1
 
 * fix: use `radians()` also when the duration is zero
