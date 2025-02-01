@@ -47,7 +47,7 @@ Create a shake effect with a specific duration, intensity, and easing curve:
 
 ```dart
 camera.shake(
-  duration: const Duration(seconds: 3),
+  duration: 3,
   intensity: 5,
   curve: Curves.linear,
 );
@@ -60,7 +60,7 @@ Zoom in/out with customizable zoom level, duration, and curve:
 ```dart
 camera.zoomTo(
   0.5,
-  duration: const Duration(seconds: 3),
+  duration: 3,
   curve: Curves.linear,
 );
 ```
@@ -73,7 +73,7 @@ Rotate the camera by an angle
 // Rotates the camera by 45°
 camera.rotateBy(
   45,
-  duration: const Duration(seconds: 3),
+  duration: 3,
   curve: Curves.linear,
 );
 ```
@@ -85,7 +85,7 @@ Move the camera to focus on a position, with optional duration and easing:
 ```dart
 camera.focusOn(
   Vector2(100, 100),
-  duration: const Duration(seconds: 3),
+  duration: 3,
   curve: Curves.linear,
 );
 ```
@@ -95,7 +95,7 @@ Move the camera to focus on a component, with optional duration and easing:
 ```dart
 camera.focusOnComponent(
   component,
-  duration: const Duration(seconds: 3),
+  duration: 3,
   curve: Curves.linear,
 );
 ```
@@ -105,10 +105,10 @@ You can chain multiple effects together for a sequence of camera movements:
 
 ```dart
 camera
-    .shake(duration: const Duration(seconds: 4), intensity: 10)
-    .then((_) => camera.zoomTo(0.1, duration: const Duration(seconds: 3)))
-    .then((_) => camera.focusOnComponent(component, duration: Duration(seconds: 3)))
-    .then((_) => camera.zoomTo(1.0, duration: const Duration(seconds: 2)));
+    .shake(duration: 4, intensity: 10)
+    .then((_) => camera.zoomTo(0.25, duration: 3))
+    .then((_) => camera.focusOnComponent(component, duration: 3))
+    .then((_) => camera.rotateBy(45, duration: 2));
 ```
 
 ### Applying Multiple Effects at Once
@@ -116,9 +116,9 @@ You can also apply multiple effects simultaneously for more dynamic interactions
 
 ```dart
 camera
-  ..shake(duration: const Duration(seconds: 4), intensity: 7)
-  ..zoomTo(0.75, duration: const Duration(seconds: 2))
-  ..rotateBy(90, duration: const Duration(seconds: 2), curve: Curves.easeInOut);
+  ..shake(duration: 4, intensity: 7)
+  ..zoomTo(0.75, duration: 2)
+  ..rotateBy(90, duration: 2, curve: Curves.easeInOut);
 ```
 
 # Why Use This Package?

@@ -33,16 +33,16 @@ class FlameCameraToolsExampleGame extends FlameGame
     camera.smoothFollow(player, stiffness: 2);
 
     // Shake the camera for 5 seconds with a intensity of 20
-    camera.shake(duration: const Duration(seconds: 5), intensity: 20).then(
+    camera.shake(duration: 5, intensity: 20).then(
           //after that focus the camera on 'someComponent' over a duration of 3 seconds with an easing curve
           (_) => camera.focusOnComponent(
             someComponent,
-            duration: const Duration(seconds: 3),
+            duration: 3,
             curve: Curves.easeInOut,
           ),
         );
     // Zoom the camera in while the shake effect is applied
-    camera.zoomTo(2, duration: const Duration(seconds: 2));
+    camera.zoomTo(2, duration: 2);
 
     return super.onLoad();
   }

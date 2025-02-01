@@ -84,21 +84,22 @@ extension FlameCameraTools on CameraComponent {
   /// - [intensity]: The intensity of the shake effect.
   /// - [curve]: The easing curve to apply during the shake effect.
   Future<void> shake({
-    required Duration duration,
+    required double duration,
     required double intensity,
+    bool weakenOverTime = true,
     Curve curve = Curves.linear,
   }) {
+    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
+
     _removeEffects<ShakeEffect>();
 
     final completer = Completer();
 
     viewfinder.add(
       ShakeEffect(
-        EffectController(
-          duration: duration.inMicroseconds / 1000000,
-          curve: curve,
-        ),
+        EffectController(duration: duration, curve: curve),
         intensity: intensity,
+        weakenOverTime: weakenOverTime,
         onComplete: () => completer.complete(),
       ),
     );
@@ -115,25 +116,23 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the zoom effect.
   Future<void> zoomTo(
     double value, {
-    Duration duration = Duration.zero,
+    double duration = 0,
     Curve curve = Curves.linear,
   }) {
     assert(value > 0, 'zoom level must be positive: $value');
+    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
 
     _removeEffects<ScaleEffect>();
 
     final completer = Completer();
 
-    if (duration == Duration.zero) {
+    if (duration == 0) {
       viewfinder.zoom = value;
     } else {
       viewfinder.add(
         ScaleEffect.to(
           Vector2.all(value),
-          EffectController(
-            duration: duration.inMicroseconds / 1000000,
-            curve: curve,
-          ),
+          EffectController(duration: duration, curve: curve),
           onComplete: () => completer.complete(),
         ),
       );
@@ -151,23 +150,21 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the rotation.
   Future<void> rotateBy(
     double angle, {
-    Duration duration = Duration.zero,
+    double duration = 0,
     Curve curve = Curves.linear,
   }) {
+    assert(duration >= 0, 'Invalid duration: Value must be non negative');
     _removeEffects<RotateEffect>();
 
     final completer = Completer();
 
-    if (duration == Duration.zero) {
+    if (duration == 0) {
       viewfinder.angle = radians(angle);
     } else {
       viewfinder.add(
         RotateEffect.by(
           radians(angle),
-          EffectController(
-            duration: duration.inMicroseconds / 1000000,
-            curve: curve,
-          ),
+          EffectController(duration: duration, curve: curve),
           onComplete: () => completer.complete(),
         ),
       );
@@ -183,23 +180,21 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the movement.
   Future<void> focusOn(
     Vector2 targetPosition, {
-    Duration duration = Duration.zero,
+    double duration = 0,
     Curve curve = Curves.linear,
   }) {
+    assert(duration >= 0, 'Invalid duration: Value must be non negative');
     stop();
 
     final completer = Completer();
 
-    if (duration == Duration.zero) {
+    if (duration == 0) {
       viewfinder.position = targetPosition;
     } else {
       viewfinder.add(
         MoveToEffect(
           targetPosition,
-          EffectController(
-            duration: duration.inMicroseconds / 1000000,
-            curve: curve,
-          ),
+          EffectController(duration: duration, curve: curve),
           onComplete: () => completer.complete(),
         ),
       );
@@ -215,7 +210,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the movement.
   Future<void> focusOnComponent(
     ReadOnlyPositionProvider target, {
-    Duration duration = Duration.zero,
+    double duration = 0,
     Curve curve = Curves.linear,
   }) {
     return focusOn(
