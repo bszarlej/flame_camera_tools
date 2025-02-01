@@ -1,3 +1,8 @@
+## 1.0.1
+
+* Calling `complete()` on completers when duration is zero
+* Cosmetic changes inside `README.md`
+
 ## 1.0.0
 
 * Added `weakenOverTime` parameter to `shake()` method
@@ -15,7 +20,7 @@
 ## 0.0.4
 
 * Removed `stiffness` parameter from `areaFollow()`
-* Added `maxSpeed` parameter to `areaFolow()` and `AreaFollowBehavior`
+* Added `maxSpeed` parameter to `areaFollow()` and `AreaFollowBehavior`
 
 ## 0.0.3
 
