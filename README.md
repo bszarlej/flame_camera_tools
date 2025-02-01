@@ -42,70 +42,55 @@ Use `areaFollow()` to make the camera follow a component only once it moves outs
 ```dart
 camera.areaFollow(component, areaBounds: const Rect.fromLTRB(100, 100, 100, 100));
 ```
+
+The above code will create a `200x200` “dead zone” around the target, where the camera does not follow it.
+
 ### Apply a Shake Effect
-Create a shake effect with a specific duration, intensity, and easing curve:
+Create a shake effect with a specific duration, intensity, and curve:
 
 ```dart
-camera.shake(
-  duration: 3,
-  intensity: 5,
-  curve: Curves.linear,
-);
+camera.shake(intensity: 5, duration: 3, curve: Curves.easeInOut);
 ```
+
+The shaking effect is automatically weakened over time. If you do not want such behavior, set the `weakenOverTime` parameter to `false`.
 
 ### Zooming in/out
 
-Zoom in/out with customizable zoom level, duration, and curve:
+Zoom in/out with optional duration and curve:
 
 ```dart
-camera.zoomTo(
-  0.5,
-  duration: 3,
-  curve: Curves.linear,
-);
+camera.zoomTo(0.5, duration: 3, curve: Curves.easeInOut);
 ```
 
 ### Rotating
 
-Rotate the camera by an angle
+Rotate the camera by an angle with optional duration and curve:
 
 ```dart
-// Rotates the camera by 45°
-camera.rotateBy(
-  45,
-  duration: 3,
-  curve: Curves.linear,
-);
+// Rotates the camera by 45 degrees
+camera.rotateBy(45, duration: 3, curve: Curves.easeInOut);
 ```
 
 ### Focusing the Camera
 
-Move the camera to focus on a position, with optional duration and easing:
+Move the camera to focus on a position, with optional duration and curve:
 
 ```dart
-camera.focusOn(
-  Vector2(100, 100),
-  duration: 3,
-  curve: Curves.linear,
-);
+camera.focusOn(Vector2(100, 100), duration: 3, curve: Curves.easeInOut);
 ```
 
-Move the camera to focus on a component, with optional duration and easing:
+Move the camera to focus on a component, with optional duration and curve:
 
 ```dart
-camera.focusOnComponent(
-  component,
-  duration: 3,
-  curve: Curves.linear,
-);
-```
+camera.focusOnComponent(component, duration: 3, curve: Curves.easeInOut);
+``` 
 
 ### Chaining Multiple Effects
 You can chain multiple effects together for a sequence of camera movements:
 
 ```dart
 camera
-    .shake(duration: 4, intensity: 10)
+    .shake(intensity: 10, duration: 4)
     .then((_) => camera.zoomTo(0.25, duration: 3))
     .then((_) => camera.focusOnComponent(component, duration: 3))
     .then((_) => camera.rotateBy(45, duration: 2));
@@ -116,7 +101,7 @@ You can also apply multiple effects simultaneously for more dynamic interactions
 
 ```dart
 camera
-  ..shake(duration: 4, intensity: 7)
+  ..shake(intensity: 7, duration: 4)
   ..zoomTo(0.75, duration: 2)
   ..rotateBy(90, duration: 2, curve: Curves.easeInOut);
 ```
