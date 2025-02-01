@@ -30,7 +30,7 @@ class SmoothFollowBehavior extends FollowBehavior {
     super.key,
     super.priority,
   }) {
-    assert(stiffness > 0, 'stiffness must be positive: $stiffness');
+    assert(stiffness > 0, 'Invalid stiffness: Value must be positive.');
   }
 
   final _tempDelta = Vector2.zero();
