@@ -128,6 +128,7 @@ extension FlameCameraTools on CameraComponent {
 
     if (duration == 0) {
       viewfinder.zoom = value;
+      completer.complete();
     } else {
       viewfinder.add(
         ScaleEffect.to(
@@ -153,13 +154,14 @@ extension FlameCameraTools on CameraComponent {
     double duration = 0,
     Curve curve = Curves.linear,
   }) {
-    assert(duration >= 0, 'Invalid duration: Value must be non negative');
+    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
     _removeEffects<RotateEffect>();
 
     final completer = Completer();
 
     if (duration == 0) {
       viewfinder.angle = radians(angle);
+      completer.complete();
     } else {
       viewfinder.add(
         RotateEffect.by(
@@ -183,13 +185,14 @@ extension FlameCameraTools on CameraComponent {
     double duration = 0,
     Curve curve = Curves.linear,
   }) {
-    assert(duration >= 0, 'Invalid duration: Value must be non negative');
+    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
     stop();
 
     final completer = Completer();
 
     if (duration == 0) {
       viewfinder.position = targetPosition;
+      completer.complete();
     } else {
       viewfinder.add(
         MoveToEffect(
