@@ -6,6 +6,7 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 <a title="Pub Points" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/points/flame_camera_tools.svg?style=popout" /></a>
 <a title="Pub Likes" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/likes/flame_camera_tools.svg?style=popout" /></a>
 
+
 # Features
 - Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance.
 - Area Follow: The camera follows a target component only after the target moves outside a specified rectangular area. This is useful for creating "dead zones" where the camera does not immediately follow the target.
@@ -34,14 +35,16 @@ final camera = game.camera;
 Use `smoothFollow()` to make the camera smoothly follow a component with adjustable stiffness:
 
 ```dart
-camera.smoothFollow(component, stiffness: 5);
+camera.smoothFollow(component, stiffness: 1.5);
 ```
+![Demo](assets/smooth_follow.gif)
 
 Use `areaFollow()` to make the camera follow a component only once it moves outside a defined rectangular area:
 
 ```dart
 camera.areaFollow(component, areaBounds: const Rect.fromLTRB(100, 100, 100, 100));
 ```
+![Demo](assets/area_follow.gif)
 
 The above code will create a `200x200` “dead zone” around the target, where the camera does not follow it.
 
@@ -49,8 +52,9 @@ The above code will create a `200x200` “dead zone” around the target, where 
 Create a shake effect with a specific duration, intensity, and curve:
 
 ```dart
-camera.shake(intensity: 5, duration: 3, curve: Curves.easeInOut);
+camera.shake(intensity: 10, duration: 5, curve: Curves.linear);
 ```
+![Demo](assets/shake.gif)
 
 The shaking effect is automatically weakened over time. If you do not want such behavior, set the `weakenOverTime` parameter to `false`.
 
@@ -61,6 +65,7 @@ Zoom in/out with optional duration and curve:
 ```dart
 camera.zoomTo(0.5, duration: 3, curve: Curves.easeInOut);
 ```
+![Demo](assets/zoom.gif)
 
 ### Rotating
 
@@ -70,14 +75,16 @@ Rotate the camera by an angle with optional duration and curve:
 // Rotates the camera by 45 degrees
 camera.rotateBy(45, duration: 3, curve: Curves.easeInOut);
 ```
+![Demo](assets/rotate.gif)
 
 ### Focusing the Camera
 
 Move the camera to focus on a position, with optional duration and curve:
 
 ```dart
-camera.focusOn(Vector2(100, 100), duration: 3, curve: Curves.easeInOut);
+camera.focusOn(Vector2(200, 200), duration: 3, curve: Curves.easeInOut);
 ```
+![Demo](assets/focus_on.gif) 
 
 Move the camera to focus on a component, with optional duration and curve:
 
