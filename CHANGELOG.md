@@ -1,3 +1,7 @@
+## 1.1.0
+
+* Added demo GIFs
+
 ## 1.0.1
 
 * Calling `complete()` on completers when duration is zero
