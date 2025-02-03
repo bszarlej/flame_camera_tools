@@ -86,7 +86,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the zoom effect.
   Future<void> zoomTo(
     double value, {
-    double duration = 0,
+    double duration = 1,
     Curve curve = Curves.linear,
   }) {
     assert(value > 0, 'zoom level must be positive: $value');
@@ -121,7 +121,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the rotation.
   Future<void> rotateBy(
     double angle, {
-    double duration = 0,
+    double duration = 1,
     Curve curve = Curves.linear,
   }) {
     assert(duration >= 0, 'Invalid duration: Value must be non-negative');
@@ -152,7 +152,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the movement.
   Future<void> focusOn(
     Vector2 targetPosition, {
-    double duration = 0,
+    double duration = 1,
     Curve curve = Curves.linear,
   }) {
     assert(duration >= 0, 'Invalid duration: Value must be non-negative');
@@ -183,7 +183,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [curve]: The easing curve to apply during the movement.
   Future<void> focusOnComponent(
     ReadOnlyPositionProvider target, {
-    double duration = 0,
+    double duration = 1,
     Curve curve = Curves.linear,
   }) {
     return focusOn(
@@ -191,6 +191,26 @@ extension FlameCameraTools on CameraComponent {
       duration: duration,
       curve: curve,
     );
+  }
+
+  /// Moves the camera along a series of points in sequence.
+  ///
+  /// Parameters:
+  /// - [points]: A list of [Vector2] positions for the camera to move through.
+  /// - [durationPerPoint]: The duration (in seconds) for the camera to move between each point.
+  /// - [curve]: The easing curve to apply during the movement.
+  Future<void> moveAlongPath(
+    List<Vector2> points, {
+    double durationPerPoint = 1,
+    Curve curve = Curves.linear,
+  }) async {
+    for (final point in points) {
+      await focusOn(
+        point,
+        duration: durationPerPoint,
+        curve: curve,
+      );
+    }
   }
 
   void _removeEffects<T>() {

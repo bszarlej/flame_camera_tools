@@ -1,3 +1,8 @@
+## 1.2.0
+
+* Added `moveAlongPath()` method for CameraComponent
+* Adjusted effect duration defaults to 1 second
+
 ## 1.1.0
 
 * Added demo GIFs

@@ -5,14 +5,16 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 <a title="Pub" href="https://pub.dev/packages/flame_camera_tools" ><img src="https://img.shields.io/pub/v/flame_camera_tools.svg?style=popout" /></a>
 <a title="Pub Points" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/points/flame_camera_tools.svg?style=popout" /></a>
 <a title="Pub Likes" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/likes/flame_camera_tools.svg?style=popout" /></a>
+<a title="Pub Downloads" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/dm/flame_camera_tools" /></a>
 
 
 # Features
 - Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance.
 - Area Follow: The camera follows a target component only after the target moves outside a specified rectangular area. This is useful for creating "dead zones" where the camera does not immediately follow the target.
 - Shake Effect: Apply a shake effect to any PositionProvider.
-- Zooming: Zoom in or out with customizable durations.
+- Zooming: Zoom in/out.
 - Rotating: Rotate the camera by an angle.
+- Move Along Path: Move the camera sequentially through a series of points.
 - Focus Effects: Focus the camera on a position or component.
 - Customizable Effects: Modify the duration and curve of each effect.
 - Chaining Effects: Seamlessly chain multiple effects using Futures.
@@ -91,6 +93,19 @@ Move the camera to focus on a component, with optional duration and curve:
 ```dart
 camera.focusOnComponent(component, duration: 3, curve: Curves.easeInOut);
 ``` 
+
+### Move Along a Path
+
+Move the camera sequentially along a series of points:
+
+```dart
+camera.moveAlongPath(
+  [Vector2(100, 100), Vector2(200, 0), Vector2(300, 100)],
+  durationPerPoint: 0.5,
+  curve: Curves.easeInOut,
+);
+```
+![Demo](assets/move_along_path.gif) 
 
 ### Chaining Multiple Effects
 You can chain multiple effects together for a sequence of camera movements:
