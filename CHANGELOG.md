@@ -1,3 +1,7 @@
+## 2.0.0
+
+* Merge `SmoothFollowBehavior` and `AreaFollowBehavior` into one class
+
 ## 1.2.0
 
 * Added `moveAlongPath()` method for CameraComponent
