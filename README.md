@@ -9,8 +9,7 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 
 
 # Features
-- Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance.
-- Area Follow: The camera follows a target component only after the target moves outside a specified rectangular area. This is useful for creating "dead zones" where the camera does not immediately follow the target.
+- Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance. In addition, you can specify a dead zone in which the camera does not follow the target. 
 - Shake Effect: Apply a shake effect to any PositionProvider.
 - Zooming: Zoom in/out.
 - Rotating: Rotate the camera by an angle.
@@ -41,14 +40,14 @@ camera.smoothFollow(component, stiffness: 1.5);
 ```
 ![Demo](assets/smooth_follow.gif)
 
-Use `areaFollow()` to make the camera follow a component only once it moves outside a defined rectangular area:
+You can also specify a `deadZone` in which the camera does not follow the target:
 
 ```dart
-camera.areaFollow(component, areaBounds: const Rect.fromLTRB(100, 100, 100, 100));
+camera.smoothFollow(component, stiffness: 5, deadZone: const Rect.fromLTRB(100, 100, 100, 100));
 ```
-![Demo](assets/area_follow.gif)
+![Demo](assets/dead_zone.gif)
 
-The above code will create a `200x200` “dead zone” around the target, where the camera does not follow it.
+Make sure to use the `Rect.fromLTRB()` constructor to get the desired results.
 
 ### Apply a Shake Effect
 Create a shake effect with a specific duration, intensity, and curve:
