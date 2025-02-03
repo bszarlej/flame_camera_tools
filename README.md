@@ -105,6 +105,7 @@ camera.moveAlongPath(
   curve: Curves.easeInOut,
 );
 ```
+![Demo](assets/move_along_path.gif) 
 
 ### Chaining Multiple Effects
 You can chain multiple effects together for a sequence of camera movements:
