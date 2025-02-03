@@ -5,6 +5,7 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 <a title="Pub" href="https://pub.dev/packages/flame_camera_tools" ><img src="https://img.shields.io/pub/v/flame_camera_tools.svg?style=popout" /></a>
 <a title="Pub Points" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/points/flame_camera_tools.svg?style=popout" /></a>
 <a title="Pub Likes" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/likes/flame_camera_tools.svg?style=popout" /></a>
+<a title="Pub Downloads" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/dm/flame_camera_tools" /></a>
 
 
 # Features
