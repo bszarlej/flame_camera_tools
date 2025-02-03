@@ -234,8 +234,6 @@ extension FlameCameraTools on CameraComponent {
     double durationPerPoint = 1,
     Curve curve = Curves.linear,
   }) async {
-    stop();
-
     for (final point in points) {
       await focusOn(
         point,
