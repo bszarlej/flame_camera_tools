@@ -6,23 +6,26 @@ import 'package:flame_camera_tools/flame_camera_tools.dart';
 import 'package:flutter/widgets.dart';
 
 extension FlameCameraTools on CameraComponent {
-  /// Smoothly follows the [target] with adjustable stiffness,
+  /// Smoothly follows the [target] with adjustable [stiffness],
   /// allowing for control over the following behavior.
   ///
-  /// The camera will gradually follow the [target]
-  /// based on the [stiffness] parameter,
-  /// with the option to follow only horizontally or vertically.
-  /// The [snap] parameter allows the camera to instantly align with the target's position.
+  /// The camera will gradually follow the [target] based on the [stiffness] parameter,
+  /// with the option to restrict following to only the horizontal or vertical axis.
+  /// The [deadZone] defines an area within which the camera will not follow the [target].
+  /// The [snap] parameter allows the camera to instantly align with the target's position
+  /// before starting the smooth following behavior.
   ///
   /// Parameters:
   /// - [target]: The position provider to follow.
   /// - [stiffness]: The responsiveness of the camera's movement. A higher value results in faster following.
+  /// - [deadZone]: The area within which the camera will not follow the [target]. Defaults to `Rect.zero`.
   /// - [horizontalOnly]: If true, restricts the following behavior to the horizontal axis.
   /// - [verticalOnly]: If true, restricts the following behavior to the vertical axis.
   /// - [snap]: If true, the camera will immediately align with the target's position before following.
   void smoothFollow(
     ReadOnlyPositionProvider target, {
     double stiffness = double.infinity,
+    Rect deadZone = Rect.zero,
     bool horizontalOnly = false,
     bool verticalOnly = false,
     bool snap = false,
@@ -32,40 +35,7 @@ extension FlameCameraTools on CameraComponent {
       SmoothFollowBehavior(
         target: target,
         stiffness: stiffness,
-        horizontalOnly: horizontalOnly,
-        verticalOnly: verticalOnly,
-      ),
-    );
-    if (snap) viewfinder.position = target.position;
-  }
-
-  /// Follows the [target] within a specified rectangular area,
-  /// only tracking the target once it leaves the area.
-  ///
-  /// The camera will follow the target only when it exceeds the bounds
-  /// defined by [areaBounds]. This can be restricted to horizontal or vertical movement.
-  ///
-  /// Parameters:
-  /// - [target]: The position provider to follow.
-  /// - [areaBounds]: The rectangular area that defines when the camera should follow the target.
-  /// - [maxSpeed]: Maximum speed of the camera.
-  /// - [horizontalOnly]: If true, restricts the following behavior to the horizontal axis.
-  /// - [verticalOnly]: If true, restricts the following behavior to the vertical axis.
-  /// - [snap]: If true, the camera will immediately align with the target's position before following.
-  void areaFollow(
-    ReadOnlyPositionProvider target, {
-    required Rect areaBounds,
-    double maxSpeed = double.infinity,
-    bool horizontalOnly = false,
-    bool verticalOnly = false,
-    bool snap = false,
-  }) {
-    stop();
-    viewfinder.add(
-      AreaFollowBehavior(
-        target: target,
-        areaBounds: areaBounds,
-        maxSpeed: maxSpeed,
+        deadZone: deadZone,
         horizontalOnly: horizontalOnly,
         verticalOnly: verticalOnly,
       ),
