@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flame_camera_tools/flame_camera_tools.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flame_camera_tools/flame_camera_tools.dart';
 
 void main() {
   runApp(
@@ -30,7 +30,7 @@ class FlameCameraToolsExampleGame extends FlameGame
     world.add(someComponent);
 
     // Smoothly follow the player around
-    camera.smoothFollow(player, stiffness: 2);
+    camera.smoothFollow(player, stiffness: 0.5);
 
     // Shake the camera for 5 seconds with a intensity of 20
     camera.shake(duration: 5, intensity: 20).then(
