@@ -36,14 +36,14 @@ final camera = game.camera;
 Use `smoothFollow()` to make the camera smoothly follow a component with adjustable stiffness:
 
 ```dart
-camera.smoothFollow(component, stiffness: 1.5);
+camera.smoothFollow(component, stiffness: 0.75);
 ```
 ![Demo](assets/smooth_follow.gif)
 
 You can also specify a `deadZone` in which the camera does not follow the target:
 
 ```dart
-camera.smoothFollow(component, stiffness: 5, deadZone: const Rect.fromLTRB(100, 100, 100, 100));
+camera.smoothFollow(component, stiffness: 0.95, deadZone: const Rect.fromLTRB(100, 100, 100, 100));
 ```
 ![Demo](assets/dead_zone.gif)
 

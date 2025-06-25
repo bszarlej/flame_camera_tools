@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -13,19 +15,17 @@ import 'package:flutter/widgets.dart';
 /// once it attempts to exit the boundaries of this defined area.
 ///
 /// The [stiffness] parameter controls how quickly the [owner] follows the
-/// [target]. A higher stiffness results in faster following, while a lower
-/// stiffness creates a smoother, slower movement. If [stiffness] is set to
-/// `double.infinity` which is the default,
-/// the [owner] will follow the [target] instantly.
+/// [target]. The value should be between 0.0 and 1.0, where 0.0 means no movement
+/// and 1.0 means immediate following.
 ///
 /// The [horizontalOnly] and [verticalOnly] parameters restrict the behavior
 /// to only follow the [target] along the specified axis.
 class SmoothFollowBehavior extends FollowBehavior {
-  final double stiffness;
+  late final double stiffness;
   final Rect deadZone;
 
   SmoothFollowBehavior({
-    this.stiffness = double.infinity,
+    double stiffness = 1.0,
     this.deadZone = Rect.zero,
     required super.target,
     super.owner,
@@ -41,6 +41,8 @@ class SmoothFollowBehavior extends FollowBehavior {
           deadZone.bottom >= 0,
       'Invalid Bounds: All values must be non-negative.',
     );
+
+    this.stiffness = stiffness.clamp(0.0, 1.0);
   }
 
   final _tempDelta = Vector2.zero();
@@ -67,8 +69,9 @@ class SmoothFollowBehavior extends FollowBehavior {
       }
     }
 
+    final lerpFactor = 1 - pow(1 - stiffness, dt);
     final distance = _tempDelta.length;
-    final deltaOffset = distance * stiffness * dt;
+    final deltaOffset = distance * lerpFactor;
 
     if (distance > deltaOffset) {
       _tempDelta.scale(deltaOffset / distance);

@@ -1,3 +1,7 @@
+## 3.0.0
+
+* Changed the `stiffness` parameter of `SmoothFollowBehavior` to be a value between 0.0 and 1.0, where a value of 0.0 means no movement at all and a value of 1.0 means immediate following.
+
 ## 2.0.0
 
 * Merge `SmoothFollowBehavior` and `AreaFollowBehavior` into one class

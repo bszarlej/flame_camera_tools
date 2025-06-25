@@ -17,14 +17,14 @@ extension FlameCameraTools on CameraComponent {
   ///
   /// Parameters:
   /// - [target]: The position provider to follow.
-  /// - [stiffness]: The responsiveness of the camera's movement. A higher value results in faster following.
+  /// - [stiffness]: The responsiveness of the camera's movement. The value should be between 0.0 and 1.0, where 0.0 means no movement and 1.0 means immediate following.
   /// - [deadZone]: The area within which the camera will not follow the [target]. Defaults to `Rect.zero`.
   /// - [horizontalOnly]: If true, restricts the following behavior to the horizontal axis.
   /// - [verticalOnly]: If true, restricts the following behavior to the vertical axis.
   /// - [snap]: If true, the camera will immediately align with the target's position before following.
   void smoothFollow(
     ReadOnlyPositionProvider target, {
-    double stiffness = double.infinity,
+    double stiffness = 1.0,
     Rect deadZone = Rect.zero,
     bool horizontalOnly = false,
     bool verticalOnly = false,
