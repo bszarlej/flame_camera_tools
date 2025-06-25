@@ -1,7 +1,3 @@
-## 3.0.1
-
-* Fixed `stiffness` value in the example code
-
 ## 3.0.0
 
 * Changed the `stiffness` parameter of `SmoothFollowBehavior` to be a value between 0.0 and 1.0, where a value of 0.0 means no movement at all and a value of 1.0 means immediate following.
