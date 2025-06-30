@@ -1,32 +1,43 @@
 import 'dart:math';
 
 import 'package:flame/camera.dart';
-import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flame/game.dart';
+import 'package:flame_camera_tools/flame_camera_tools.dart';
 
-/// This behavior causes the [owner] to smoothly follow the [target] when the
-/// [target] moves outside the defined [deadZone]. Typically, you would apply
-/// this behavior to [CameraComponent]'s [Viewfinder], but it can be utilized
-/// with any [PositionProvider].
+/// A behavior that allows the [owner] to smoothly follow a [target] component
+/// while respecting a specified [deadZone].
 ///
-/// The [deadZone] represents a "dead zone" within which the [owner] will
-/// not follow the [target]. The [owner] will only start to track the [target]
-/// once it attempts to exit the boundaries of this defined area.
+/// This behavior is typically applied to a [Viewfinder] (used by [CameraComponent])
+/// but can be used with any [PositionProvider].
 ///
-/// The [stiffness] parameter controls how quickly the [owner] follows the
-/// [target]. The value should be between 0.0 and 1.0, where 0.0 means no movement
-/// and 1.0 means immediate following.
+/// The [deadZone] defines an area around the owner where the target can move
+/// freely without causing the owner to follow. Only when the target exits
+/// this zone does the owner begin moving to follow it.
 ///
-/// The [horizontalOnly] and [verticalOnly] parameters restrict the behavior
-/// to only follow the [target] along the specified axis.
+/// The [stiffness] parameter controls how quickly the owner moves toward
+/// the target. It should be in the range `0.0` to `1.0`, where:
+/// - `0.0` results in no movement at all,
+/// - `1.0` causes the owner to immediately jump to follow the target,
+/// - Intermediate values result in smooth, spring-like movement.
+///
+/// Set [horizontalOnly] or [verticalOnly] to restrict movement to a single axis.
 class SmoothFollowBehavior extends FollowBehavior {
+  /// Controls how quickly the owner moves toward the target.
+  ///
+  /// A value between `0.0` (no movement) and `1.0` (immediate snap).
   late final double stiffness;
-  final Rect deadZone;
 
+  /// Creates a [SmoothFollowBehavior].
+  ///
+  /// - [stiffness]: Controls follow responsiveness.
+  /// - [deadZone]: Optional. If not provided, a [CircularDeadzone] with radius `0` is used.
+  /// - [target]: The component to follow.
+  /// - [owner]: The component this behavior is attached to (typically a [Viewfinder]).
+  /// - [horizontalOnly]: Follow only along the x-axis.
+  /// - [verticalOnly]: Follow only along the y-axis.
   SmoothFollowBehavior({
     double stiffness = 1.0,
-    this.deadZone = Rect.zero,
+    Deadzone? deadZone,
     required super.target,
     super.owner,
     super.horizontalOnly,
@@ -34,40 +45,19 @@ class SmoothFollowBehavior extends FollowBehavior {
     super.key,
     super.priority,
   }) {
-    assert(
-      deadZone.left >= 0 &&
-          deadZone.top >= 0 &&
-          deadZone.right >= 0 &&
-          deadZone.bottom >= 0,
-      'Invalid Bounds: All values must be non-negative.',
-    );
-
     this.stiffness = stiffness.clamp(0.0, 1.0);
+    _deadZone = deadZone ?? CircularDeadzone();
   }
 
+  late final Deadzone _deadZone;
   final _tempDelta = Vector2.zero();
 
   @override
   void update(double dt) {
-    _tempDelta.setValues(0, 0);
+    _tempDelta.setFrom(_deadZone.computeDelta(owner.position, target.position));
 
-    if (!verticalOnly) {
-      final deltaX = target.position.x - owner.position.x;
-      if (deltaX > deadZone.right) {
-        _tempDelta.x = deltaX - deadZone.right;
-      } else if (deltaX < -deadZone.left) {
-        _tempDelta.x = deltaX + deadZone.left;
-      }
-    }
-
-    if (!horizontalOnly) {
-      final deltaY = target.position.y - owner.position.y;
-      if (deltaY > deadZone.bottom) {
-        _tempDelta.y = deltaY - deadZone.bottom;
-      } else if (deltaY < -deadZone.top) {
-        _tempDelta.y = deltaY + deadZone.top;
-      }
-    }
+    if (horizontalOnly) _tempDelta.y = 0;
+    if (verticalOnly) _tempDelta.x = 0;
 
     final lerpFactor = 1 - pow(1 - stiffness, dt);
     final distance = _tempDelta.length;

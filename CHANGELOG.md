@@ -1,3 +1,10 @@
+## 4.0.0
+
+* Replaced `deadZone` parameter from a fixed rectangular Rect to a flexible Deadzone abstraction.
+* Added new deadzone implementations: `RectangularDeadzone` and `CircularDeadzone`, allowing for customizable deadzone shapes.
+* Updated `SmoothFollowBehavior` to use the new `Deadzone` system, enhancing how the camera follows targets based on configurable deadzone boundaries.
+* Improved documentation
+
 ## 3.0.1
 
 * Fixed `stiffness` value in the example code
