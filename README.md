@@ -43,11 +43,9 @@ camera.smoothFollow(component, stiffness: 0.75);
 You can also specify a `deadZone` in which the camera does not follow the target:
 
 ```dart
-camera.smoothFollow(component, stiffness: 0.95, deadZone: const Rect.fromLTRB(100, 100, 100, 100));
+camera.smoothFollow(component, stiffness: 0.95, deadZone: RectangularDeadzone(left: 100, top: 100, right: 100, bottom: 100));
 ```
 ![Demo](assets/dead_zone.gif)
-
-Make sure to use the `Rect.fromLTRB()` constructor to get the desired results.
 
 ### Apply a Shake Effect
 Create a shake effect with a specific duration, intensity, and curve:

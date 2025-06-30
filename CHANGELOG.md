@@ -1,3 +1,7 @@
+## 4.0.1
+
+* Updated `README.md`
+
 ## 4.0.0
 
 * Replaced `deadZone` parameter from a fixed rectangular Rect to a flexible Deadzone abstraction.
