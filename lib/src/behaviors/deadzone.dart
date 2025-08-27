@@ -37,6 +37,8 @@ class RectangularDeadzone implements Deadzone {
   /// Distance from the center to the bottom boundary.
   final double bottom;
 
+  final _delta = Vector2.zero();
+
   /// Creates a rectangular deadzone with the specified edge distances.
   ///
   /// All values must be non-negative. A value of `0` disables the deadzone
@@ -51,7 +53,19 @@ class RectangularDeadzone implements Deadzone {
           'All values must be non-negative.',
         );
 
-  final _delta = Vector2.zero();
+  factory RectangularDeadzone.all(double value) =>
+      RectangularDeadzone(left: value, top: value, right: value, bottom: value);
+
+  factory RectangularDeadzone.symmetric({
+    double vertical = 0.0,
+    double horizontal = 0.0,
+  }) =>
+      RectangularDeadzone(
+        left: horizontal,
+        top: vertical,
+        right: horizontal,
+        bottom: vertical,
+      );
 
   @override
   Vector2 computeDelta(Vector2 ownerPosition, Vector2 targetPosition) {
@@ -87,12 +101,12 @@ class CircularDeadzone implements Deadzone {
   /// Must be non-negative. A value of `0` disables the deadzone entirely.
   final double radius;
 
+  final _delta = Vector2.zero();
+  final _offset = Vector2.zero();
+
   /// Creates a circular deadzone with the given [radius].
   CircularDeadzone({this.radius = 0})
       : assert(radius >= 0, 'Radius must be non-negative.');
-
-  final _delta = Vector2.zero();
-  final _offset = Vector2.zero();
 
   @override
   Vector2 computeDelta(Vector2 ownerPosition, Vector2 targetPosition) {
