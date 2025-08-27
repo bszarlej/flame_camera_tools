@@ -22,9 +22,10 @@ import 'package:flame_camera_tools/flame_camera_tools.dart';
 ///
 /// Set [horizontalOnly] or [verticalOnly] to restrict movement to a single axis.
 class SmoothFollowBehavior extends FollowBehavior {
-  late double _stiffness;
-  late final Deadzone _deadZone;
+  late Deadzone deadZone;
   late Vector2 offset;
+
+  late double _stiffness;
   final _tempDelta = Vector2.zero();
 
   /// Creates a [SmoothFollowBehavior].
@@ -47,7 +48,7 @@ class SmoothFollowBehavior extends FollowBehavior {
     super.priority,
   }) {
     this.stiffness = stiffness;
-    _deadZone = deadZone ?? CircularDeadzone();
+    this.deadZone = deadZone ?? CircularDeadzone();
     this.offset = offset ?? Vector2.zero();
   }
 
@@ -63,7 +64,7 @@ class SmoothFollowBehavior extends FollowBehavior {
   @override
   void update(double dt) {
     _tempDelta.setFrom(
-        _deadZone.computeDelta(owner.position, target.position + offset));
+        deadZone.computeDelta(owner.position, target.position + offset));
 
     if (horizontalOnly) _tempDelta.y = 0;
     if (verticalOnly) _tempDelta.x = 0;
