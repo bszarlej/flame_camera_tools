@@ -9,7 +9,7 @@ flame_camera_tools is a Flutter package that enhances camera functionality for g
 
 
 # Features
-- Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance. In addition, you can specify a dead zone in which the camera does not follow the target. 
+- Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance. You can also define a dead zone where the camera does not move, and specify an offset to shift the camera's focus relative to the target. 
 - Shake Effect: Apply a shake effect to any PositionProvider.
 - Zooming: Zoom in/out.
 - Rotating: Rotate the camera by an angle.

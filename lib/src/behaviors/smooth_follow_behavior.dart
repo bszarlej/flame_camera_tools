@@ -22,7 +22,13 @@ import 'package:flame_camera_tools/flame_camera_tools.dart';
 ///
 /// Set [horizontalOnly] or [verticalOnly] to restrict movement to a single axis.
 class SmoothFollowBehavior extends FollowBehavior {
+  /// The deadzone around the owner in which the target can move freely without
+  /// causing the owner to follow.
   late Deadzone deadZone;
+
+  /// Positional offset added to the target's position before computing movement.
+  ///
+  /// Allows shifting the camera focus relative to the target.
   late Vector2 offset;
 
   late double _stiffness;
@@ -32,6 +38,8 @@ class SmoothFollowBehavior extends FollowBehavior {
   ///
   /// - [stiffness]: Controls follow responsiveness.
   /// - [deadZone]: Optional. If not provided, a [CircularDeadzone] with radius `0` is used.
+  /// - [offset]: Optional. Positional offset added to the target's position.
+  ///   Defaults to `Vector2.zero()`.
   /// - [target]: The component to follow.
   /// - [owner]: The component this behavior is attached to (typically a [Viewfinder]).
   /// - [horizontalOnly]: Follow only along the x-axis.

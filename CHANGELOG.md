@@ -1,3 +1,9 @@
+## 4.1.0
+
+* The `stiffness` and `deadZone` parameters of `SmoothFollowBehavior` are now adjustable.
+* Added the `offset` parameter to `SmoothFollowBehavior` and `camera.smoothFollow` to allow following a point offset from the target, enabling look-ahead or custom camera focus.
+* Added `RectangularDeadzone.all` and `RectangularDeadzone.symmetric` constructors.
+
 ## 4.0.1
 
 * Updated `README.md`
