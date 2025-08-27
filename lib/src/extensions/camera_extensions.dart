@@ -22,6 +22,8 @@ extension FlameCameraTools on CameraComponent {
   ///   to 1.0 (instant snap).
   /// - [deadZone]: Area inside which the camera doesn't follow the target.
   ///   If not provided, a [CircularDeadzone] with radius `0` is used.
+  /// - [offset]: Positional offset added to the target's position.
+  ///   Defaults to `Vector2.zero()`.
   /// - [horizontalOnly]: If true, follow only along the x-axis.
   /// - [verticalOnly]: If true, follow only along the y-axis.
   /// - [snap]: If true, immediately jump to the target's position.

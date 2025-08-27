@@ -53,9 +53,11 @@ class RectangularDeadzone implements Deadzone {
           'All values must be non-negative.',
         );
 
+  /// Creates a rectangular deadzone with identical offset on all sides.
   factory RectangularDeadzone.all(double value) =>
       RectangularDeadzone(left: value, top: value, right: value, bottom: value);
 
+  /// Creates a rectangular deadzone with symmetrical vertical and horizontal offsets.
   factory RectangularDeadzone.symmetric({
     double vertical = 0.0,
     double horizontal = 0.0,
