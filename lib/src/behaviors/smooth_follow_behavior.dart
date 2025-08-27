@@ -26,6 +26,7 @@ class SmoothFollowBehavior extends FollowBehavior {
   ///
   /// A value between `0.0` (no movement) and `1.0` (immediate snap).
   late final double stiffness;
+  late Vector2 offset;
 
   /// Creates a [SmoothFollowBehavior].
   ///
@@ -38,6 +39,7 @@ class SmoothFollowBehavior extends FollowBehavior {
   SmoothFollowBehavior({
     double stiffness = 1.0,
     Deadzone? deadZone,
+    Vector2? offset,
     required super.target,
     super.owner,
     super.horizontalOnly,
@@ -47,6 +49,7 @@ class SmoothFollowBehavior extends FollowBehavior {
   }) {
     this.stiffness = stiffness.clamp(0.0, 1.0);
     _deadZone = deadZone ?? CircularDeadzone();
+    this.offset = offset ?? Vector2.zero();
   }
 
   late final Deadzone _deadZone;
@@ -54,7 +57,8 @@ class SmoothFollowBehavior extends FollowBehavior {
 
   @override
   void update(double dt) {
-    _tempDelta.setFrom(_deadZone.computeDelta(owner.position, target.position));
+    _tempDelta.setFrom(
+        _deadZone.computeDelta(owner.position, target.position + offset));
 
     if (horizontalOnly) _tempDelta.y = 0;
     if (verticalOnly) _tempDelta.x = 0;

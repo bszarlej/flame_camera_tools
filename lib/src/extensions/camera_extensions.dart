@@ -29,6 +29,7 @@ extension FlameCameraTools on CameraComponent {
     ReadOnlyPositionProvider target, {
     double stiffness = 1.0,
     Deadzone? deadZone,
+    Vector2? offset,
     bool horizontalOnly = false,
     bool verticalOnly = false,
     bool snap = false,
@@ -39,6 +40,7 @@ extension FlameCameraTools on CameraComponent {
         target: target,
         stiffness: stiffness,
         deadZone: deadZone,
+        offset: offset,
         horizontalOnly: horizontalOnly,
         verticalOnly: verticalOnly,
       ),
