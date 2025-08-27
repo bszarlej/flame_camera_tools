@@ -22,10 +22,9 @@ import 'package:flame_camera_tools/flame_camera_tools.dart';
 ///
 /// Set [horizontalOnly] or [verticalOnly] to restrict movement to a single axis.
 class SmoothFollowBehavior extends FollowBehavior {
-  /// Controls how quickly the owner moves toward the target.
-  ///
-  /// A value between `0.0` (no movement) and `1.0` (immediate snap).
-  late final double stiffness;
+  late double _stiffness;
+  late final Deadzone _deadZone;
+  final _tempDelta = Vector2.zero();
 
   /// Creates a [SmoothFollowBehavior].
   ///
@@ -45,12 +44,18 @@ class SmoothFollowBehavior extends FollowBehavior {
     super.key,
     super.priority,
   }) {
-    this.stiffness = stiffness.clamp(0.0, 1.0);
+    this.stiffness = stiffness;
     _deadZone = deadZone ?? CircularDeadzone();
   }
 
-  late final Deadzone _deadZone;
-  final _tempDelta = Vector2.zero();
+  /// Controls how quickly the owner moves toward the target.
+  ///
+  /// A value between `0.0` (no movement) and `1.0` (immediate snap).
+  double get stiffness => _stiffness;
+
+  set stiffness(double value) {
+    _stiffness = value.clamp(0.0, 1.0);
+  }
 
   @override
   void update(double dt) {
