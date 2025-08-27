@@ -24,6 +24,7 @@ import 'package:flame_camera_tools/flame_camera_tools.dart';
 class SmoothFollowBehavior extends FollowBehavior {
   late double _stiffness;
   late final Deadzone _deadZone;
+  late Vector2 offset;
   final _tempDelta = Vector2.zero();
 
   /// Creates a [SmoothFollowBehavior].
@@ -37,6 +38,7 @@ class SmoothFollowBehavior extends FollowBehavior {
   SmoothFollowBehavior({
     double stiffness = 1.0,
     Deadzone? deadZone,
+    Vector2? offset,
     required super.target,
     super.owner,
     super.horizontalOnly,
@@ -46,6 +48,7 @@ class SmoothFollowBehavior extends FollowBehavior {
   }) {
     this.stiffness = stiffness;
     _deadZone = deadZone ?? CircularDeadzone();
+    this.offset = offset ?? Vector2.zero();
   }
 
   /// Controls how quickly the owner moves toward the target.
@@ -59,7 +62,8 @@ class SmoothFollowBehavior extends FollowBehavior {
 
   @override
   void update(double dt) {
-    _tempDelta.setFrom(_deadZone.computeDelta(owner.position, target.position));
+    _tempDelta.setFrom(
+        _deadZone.computeDelta(owner.position, target.position + offset));
 
     if (horizontalOnly) _tempDelta.y = 0;
     if (verticalOnly) _tempDelta.x = 0;
