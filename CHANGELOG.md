@@ -1,3 +1,12 @@
+## 5.0.0
+
+* Renamed `SmoothFollowBehavior` to `AdvancedFollowBehavior`.
+* Renamed `camera.smoothFollow` to `camera.chase` which now returns a `AdvancedFollowBehavior` instance,
+  which allows to tweak options such as `offset`, `deadzone` or `stiffness` later on.
+* All camera effect methods take now `EffectController` as a parameter, which adds even more modularity.
+* Remove `weakenOverTime` parameter from `ShakeEffect` which is the default action now.
+* Updated Documentation.
+
 ## 4.1.0
 
 * The `stiffness` and `deadZone` parameters of `SmoothFollowBehavior` are now adjustable.
