@@ -124,8 +124,9 @@ class CircularDeadzone implements Deadzone {
 
     final deltaDistance = distance - radius;
 
-    _delta.setFrom(_offset..normalize());
-    _delta.scale(deltaDistance);
+    _delta
+      ..setFrom(_offset..normalize())
+      ..scale(deltaDistance);
 
     return _delta;
   }

@@ -2,32 +2,23 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame_camera_tools/flame_camera_tools.dart';
-import 'package:flutter/widgets.dart';
+
+import '../behaviors/advanced_follow_behavior.dart';
+import '../behaviors/deadzone.dart';
+import '../effects/shake_effect.dart';
 
 extension FlameCameraTools on CameraComponent {
-  /// Smoothly follows the [target] with adjustable [stiffness], allowing fine
-  /// control over the following behavior.
+  /// Smoothly follows a target [ReadOnlyPositionProvider] using [AdvancedFollowBehavior].
   ///
-  /// The camera gradually follows the [target] based on [stiffness], optionally
-  /// restricting movement to horizontal or vertical axes. The [deadZone] defines
-  /// an area around the camera where it won't follow the target.
+  /// - [stiffness]: How quickly the camera follows the target (0.0–1.0).
+  /// - [deadZone]: Optional deadzone to prevent minor movements from moving the camera.
+  /// - [offset]: Optional positional offset applied to the target.
+  /// - [horizontalOnly]: If true, only follows in the horizontal direction.
+  /// - [verticalOnly]: If true, only follows in the vertical direction.
+  /// - [snap]: If true, immediately moves the camera to the target's position.
   ///
-  /// If [snap] is true, the camera immediately aligns with the target before
-  /// starting smooth following.
-  ///
-  /// Parameters:
-  /// - [target]: The position provider to follow.
-  /// - [stiffness]: Responsiveness of the follow behavior, from 0.0 (no movement)
-  ///   to 1.0 (instant snap).
-  /// - [deadZone]: Area inside which the camera doesn't follow the target.
-  ///   If not provided, a [CircularDeadzone] with radius `0` is used.
-  /// - [offset]: Positional offset added to the target's position.
-  ///   Defaults to `Vector2.zero()`.
-  /// - [horizontalOnly]: If true, follow only along the x-axis.
-  /// - [verticalOnly]: If true, follow only along the y-axis.
-  /// - [snap]: If true, immediately jump to the target's position.
-  void smoothFollow(
+  /// Returns the [AdvancedFollowBehavior] instance, allowing later adjustments to its settings.
+  AdvancedFollowBehavior chase(
     ReadOnlyPositionProvider target, {
     double stiffness = 1.0,
     Deadzone? deadZone,
@@ -37,186 +28,151 @@ extension FlameCameraTools on CameraComponent {
     bool snap = false,
   }) {
     stop();
-    viewfinder.add(
-      SmoothFollowBehavior(
-        target: target,
-        stiffness: stiffness,
-        deadZone: deadZone,
-        offset: offset,
-        horizontalOnly: horizontalOnly,
-        verticalOnly: verticalOnly,
-      ),
+
+    final advancedFollowBehavior = AdvancedFollowBehavior(
+      target: target,
+      stiffness: stiffness,
+      deadZone: deadZone,
+      offset: offset,
+      horizontalOnly: horizontalOnly,
+      verticalOnly: verticalOnly,
     );
+
+    viewfinder.add(advancedFollowBehavior);
+
     if (snap) viewfinder.position = target.position;
+
+    return advancedFollowBehavior;
   }
 
-  /// Applies a shake effect to the camera,
-  /// creating a random jittering movement.
+  /// Shakes the camera using a [ShakeEffect].
   ///
-  /// The shake effect can be customized with intensity, duration,
-  /// and easing curve.
+  /// - [amplitude]: Maximum shake offset in pixels.
+  /// - [controller]: Defines the duration, progression curve, and damping of the shake effect.
   ///
-  /// Parameters:
-  /// - [duration]: The duration for the shake effect.
-  /// - [intensity]: The intensity of the shake effect.
-  /// - [curve]: The easing curve to apply during the shake effect.
-  Future<void> shake({
-    required double duration,
-    required double intensity,
-    bool weakenOverTime = true,
-    Curve curve = Curves.linear,
-  }) {
-    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
-
+  /// Returns a [Future] that completes when the shake finishes.
+  Future<void> shake(double amplitude, EffectController controller) {
     _removeEffects<ShakeEffect>();
 
     final completer = Completer();
 
     viewfinder.add(
       ShakeEffect(
-        EffectController(duration: duration, curve: curve),
-        intensity: intensity,
-        weakenOverTime: weakenOverTime,
-        onComplete: () => completer.complete(),
+        amplitude,
+        controller,
+        onComplete: completer.complete,
       ),
     );
 
     return completer.future;
   }
 
-  /// Zooms the camera to a specific zoom level,
-  /// with an optional duration and easing curve.
+  /// Smoothly zooms the camera by a relative [value].
   ///
-  /// Parameters:
-  /// - [value]: The target zoom level, which must be positive.
-  /// - [duration]: The duration over which the zoom effect should occur.
-  /// - [curve]: The easing curve to apply during the zoom effect.
-  Future<void> zoomTo(
-    double value, {
-    double duration = 1,
-    Curve curve = Curves.linear,
-  }) {
+  /// - [value]: The relative change in zoom. For example, `0.5` increases the zoom by 50%, while `-0.5` decreases it by 50%.
+  /// - [controller]: Controls the duration, interpolation curve, and smoothing of the zoom effect.
+  ///
+  /// Returns a [Future] that completes when the zoom finishes.
+  Future<void> zoomBy(double value, EffectController controller) {
+    _removeEffects<ScaleEffect>();
+
+    final completer = Completer();
+
+    viewfinder.add(
+      ScaleEffect.by(
+        Vector2.all(1 + value),
+        controller,
+        onComplete: completer.complete,
+      ),
+    );
+
+    return completer.future;
+  }
+
+  /// Smoothly zooms the camera to an absolute zoom level [value].
+  ///
+  /// - [value]: Target zoom level (must be positive).
+  /// - [controller]: Controls the duration, interpolation curve, and smoothing of the zoom effect.
+  ///
+  /// Returns a [Future] that completes when the zoom finishes.
+  Future<void> zoomTo(double value, EffectController controller) {
     assert(value > 0, 'zoom level must be positive: $value');
-    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
 
     _removeEffects<ScaleEffect>();
 
     final completer = Completer();
 
-    if (duration == 0) {
-      viewfinder.zoom = value;
-      completer.complete();
-    } else {
-      viewfinder.add(
-        ScaleEffect.to(
-          Vector2.all(value),
-          EffectController(duration: duration, curve: curve),
-          onComplete: () => completer.complete(),
-        ),
-      );
-    }
+    viewfinder.add(
+      ScaleEffect.to(
+        Vector2.all(value),
+        controller,
+        onComplete: completer.complete,
+      ),
+    );
 
     return completer.future;
   }
 
-  /// Rotates the camera by the given [angle],
-  /// with an optional duration and easing curve.
+  /// Rotates the camera by a relative [angle] in radians.
   ///
-  /// Parameters:
-  /// - [angle]: The angle to rotate the camera to.
-  /// - [duration]: The duration over which the rotation should occur.
-  /// - [curve]: The easing curve to apply during the rotation.
-  Future<void> rotateBy(
-    double angle, {
-    double duration = 1,
-    Curve curve = Curves.linear,
-  }) {
-    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
+  /// - [angle]: Amount to rotate the camera by in radians.
+  /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
+  ///
+  /// Returns a [Future] that completes when the rotation finishes.
+  Future<void> rotateBy(double angle, EffectController controller) {
     _removeEffects<RotateEffect>();
 
     final completer = Completer();
 
-    if (duration == 0) {
-      viewfinder.angle = radians(angle);
-      completer.complete();
-    } else {
-      viewfinder.add(
-        RotateEffect.by(
-          radians(angle),
-          EffectController(duration: duration, curve: curve),
-          onComplete: () => completer.complete(),
-        ),
-      );
-    }
+    viewfinder.add(
+      RotateEffect.by(
+        radians(angle),
+        controller,
+        onComplete: completer.complete,
+      ),
+    );
+
     return completer.future;
   }
 
-  /// Moves the camera to focus on a specific target position.
+  /// Moves the camera directly to a [targetPosition].
   ///
-  /// Parameters:
-  /// - [targetPosition]: The target position to focus on.
-  /// - [duration]: The duration for the camera to move to the target position.
-  /// - [curve]: The easing curve to apply during the movement.
-  Future<void> focusOn(
-    Vector2 targetPosition, {
-    double duration = 1,
-    Curve curve = Curves.linear,
-  }) {
-    assert(duration >= 0, 'Invalid duration: Value must be non-negative');
+  /// - [targetPosition]: The position to move the camera to.
+  /// - [controller]: Controls the duration, interpolation curve, and smoothing of the movement.
+  ///
+  /// Returns a [Future] that completes when the movement finishes.
+  Future<void> lookAt(Vector2 targetPosition, EffectController controller) {
     stop();
 
     final completer = Completer();
 
-    if (duration == 0) {
-      viewfinder.position = targetPosition;
-      completer.complete();
-    } else {
-      viewfinder.add(
-        MoveToEffect(
-          targetPosition,
-          EffectController(duration: duration, curve: curve),
-          onComplete: () => completer.complete(),
-        ),
-      );
-    }
+    viewfinder.add(
+      MoveToEffect(
+        targetPosition,
+        controller,
+        onComplete: completer.complete,
+      ),
+    );
+
     return completer.future;
   }
 
-  /// Moves the camera to focus on a component's position.
+  /// Plays a sequence of camera effects in order.
   ///
-  /// Parameters:
-  /// - [target]: The [PositionProvider] to focus on.
-  /// - [duration]: The duration for the camera to move to the component's position.
-  /// - [curve]: The easing curve to apply during the movement.
-  Future<void> focusOnComponent(
-    ReadOnlyPositionProvider target, {
-    double duration = 1,
-    Curve curve = Curves.linear,
-  }) {
-    return focusOn(
-      target.position,
-      duration: duration,
-      curve: curve,
-    );
-  }
-
-  /// Moves the camera along a series of points in sequence.
+  /// - [effects]: A list of functions that return [Future]s for each effect.
+  /// Each effect will start only after the previous one completes.
   ///
-  /// Parameters:
-  /// - [points]: A list of [Vector2] positions for the camera to move through.
-  /// - [durationPerPoint]: The duration (in seconds) for the camera to move between each point.
-  /// - [curve]: The easing curve to apply during the movement.
-  Future<void> moveAlongPath(
-    List<Vector2> points, {
-    double durationPerPoint = 1,
-    Curve curve = Curves.linear,
-  }) async {
-    for (final point in points) {
-      await focusOn(
-        point,
-        duration: durationPerPoint,
-        curve: curve,
-      );
+  /// Example usage:
+  /// ```dart
+  /// await camera.effectSequence([
+  ///   () => camera.shake(20.0, LinearEffectController(0.5)),
+  ///   () => camera.zoomTo(2.0, LinearEffectController(0.5)),
+  ///   () => camera.rotateBy(45, LinearEffectController(0.5)),
+  /// ]);
+  /// ```
+  Future<void> effectSequence(List<Future<void> Function()> effects) async {
+    for (final effect in effects) {
+      await effect();
     }
   }
 

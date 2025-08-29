@@ -1,26 +1,30 @@
-# flame_camera_tools
+# flame\_camera\_tools
 
-flame_camera_tools is a Flutter package that enhances camera functionality for games built with Flame. It provides a intuitive way to manage camera behavior, making it easier to create dynamic and immersive experiences in 2D game worlds.
+[![Pub](https://img.shields.io/pub/v/flame_camera_tools.svg?style=popout)](https://pub.dev/packages/flame_camera_tools)
+[![Pub Points](https://img.shields.io/pub/points/flame_camera_tools.svg?style=popout)](https://pub.dev/packages/flame_camera_tools/score)
+[![Pub Likes](https://img.shields.io/pub/likes/flame_camera_tools.svg?style=popout)](https://pub.dev/packages/flame_camera_tools/score)
+[![Pub Downloads](https://img.shields.io/pub/dm/flame_camera_tools.svg?style=popout)](https://pub.dev/packages/flame_camera_tools)
 
-<a title="Pub" href="https://pub.dev/packages/flame_camera_tools" ><img src="https://img.shields.io/pub/v/flame_camera_tools.svg?style=popout" /></a>
-<a title="Pub Points" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/points/flame_camera_tools.svg?style=popout" /></a>
-<a title="Pub Likes" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/likes/flame_camera_tools.svg?style=popout" /></a>
-<a title="Pub Downloads" href="https://pub.dev/packages/flame_camera_tools/score" ><img src="https://img.shields.io/pub/dm/flame_camera_tools" /></a>
+`flame_camera_tools` is a Flutter package that enhances camera functionality for games built with [Flame](https://flame-engine.org/).
+It provides a set of convenient extensions for `CameraComponent` to handle smooth following, camera shake, zooming, rotating, path movement, and complex effect sequencing. This makes it easier to create dynamic and immersive 2D game experiences.
 
+---
 
-# Features
-- Smooth Follow: The camera smoothly follows a target component, adjusting the speed based on the distance. You can also define a dead zone where the camera does not move, and specify an offset to shift the camera's focus relative to the target. 
-- Shake Effect: Apply a shake effect to any PositionProvider.
-- Zooming: Zoom in/out.
-- Rotating: Rotate the camera by an angle.
-- Move Along Path: Move the camera sequentially through a series of points.
-- Focus Effects: Focus the camera on a position or component.
-- Customizable Effects: Modify the duration and curve of each effect.
-- Chaining Effects: Seamlessly chain multiple effects using Futures.
+## Features
+
+* **Smooth Follow:** The camera can smoothly follow a target component with adjustable stiffness. Supports configurable deadzones and offsets.
+* **Shake Effect:** Apply a randomized shake effect to the camera or any `PositionProvider`.
+* **Zooming:** Zoom in and out smoothly with optional duration and curve.
+* **Rotating:** Rotate the camera by a specified angle with optional duration and curve.
+* **Focus Effects:** Move the camera to focus on a specific position or component.
+* **Customizable Effects:** Each effect allows control over duration, easing curve, and intensity.
+* **Chaining Effects:** Sequence multiple effects using `Future`s for smooth transitions.
+* **Simultaneous Effects:** Apply multiple effects at once for dynamic interactions.
+
 
 ## Usage
 
-You can either instantiate your own CameraComponent directly or use the camera provided by the FlameGame class:
+You can use your own `CameraComponent` or access the camera provided by `FlameGame`:
 
 ```dart
 // Directly instantiate the CameraComponent
@@ -32,99 +36,138 @@ final camera = CameraComponent();
 final camera = game.camera;
 ```
 
-### Follow a Component
-Use `smoothFollow()` to make the camera smoothly follow a component with adjustable stiffness:
+---
+
+### Smoothly Follow a Component
+
+![Demo](assets/chase.gif)
+
+![Demo](assets/deadzone.gif)
+
+Use `chase()` to make the camera follow a target with adjustable stiffness and deadzone. It returns an `AdvancedFollowBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
 
 ```dart
-camera.smoothFollow(component, stiffness: 0.75);
-```
-![Demo](assets/smooth_follow.gif)
+final followBehavior = camera.chase(component, stiffness: 0.95);
 
-You can also specify a `deadZone` in which the camera does not follow the target:
+// Later, you can adjust settings
+followBehavior.offset = Vector2(0, -50);
+followBehavior.stiffness = 0.9;
+```
+
+Optional parameters:
 
 ```dart
-camera.smoothFollow(component, stiffness: 0.95, deadZone: RectangularDeadzone(left: 100, top: 100, right: 100, bottom: 100));
+camera.chase(
+  component,
+  stiffness: 0.95,
+  deadZone: RectangularDeadzone(left: 100, top: 100, right: 100, bottom: 100),
+  offset: Vector2(0, -50),
+  horizontalOnly: false,
+  verticalOnly: false,
+  snap: true, // immediately move camera to target
+);
 ```
-![Demo](assets/dead_zone.gif)
+
+---
 
 ### Apply a Shake Effect
-Create a shake effect with a specific duration, intensity, and curve:
+
+Create a shake effect with specific amplitude and duration:
 
 ```dart
-camera.shake(intensity: 10, duration: 5, curve: Curves.linear);
+await camera.shake(10.0, LinearEffectController(0.5));
 ```
-![Demo](assets/shake.gif)
 
-The shaking effect is automatically weakened over time. If you do not want such behavior, set the `weakenOverTime` parameter to `false`.
+* `amplitude`: Maximum displacement in pixels at the start of the effect.
+* `controller`: Defines the duration, progression curve, and damping of the shake.
 
-### Zooming in/out
+The shake effect automatically weakens over time.
 
-Zoom in/out with optional duration and curve:
+---
+
+### Zooming
+
+Zoom in or out relative to the current zoom:
 
 ```dart
-camera.zoomTo(0.5, duration: 3, curve: Curves.easeInOut);
+await camera.zoomBy(0.5, LinearEffectController(1.0));
 ```
-![Demo](assets/zoom.gif)
+
+Or zoom to an absolute zoom level:
+
+```dart
+await camera.zoomTo(2.0, LinearEffectController(1.0));
+```
+
+* `value`: Relative or absolute zoom level.
+* `controller`: Controls duration, curve, and smoothing.
+
+---
 
 ### Rotating
 
-Rotate the camera by an angle with optional duration and curve:
+Rotate the camera by a relative angle (in radians):
 
 ```dart
-// Rotates the camera by 45 degrees
-camera.rotateBy(45, duration: 3, curve: Curves.easeInOut);
+await camera.rotateBy(45, LinearEffectController(1.0)); // rotate 45 degrees
 ```
-![Demo](assets/rotate.gif)
+
+* `angle`: Rotation in radians.
+* `controller`: Controls duration, curve, and smoothing.
+
+---
 
 ### Focusing the Camera
 
-Move the camera to focus on a position, with optional duration and curve:
+Move the camera to a specific position:
 
 ```dart
-camera.focusOn(Vector2(200, 200), duration: 3, curve: Curves.easeInOut);
+await camera.lookAt(Vector2(200, 200), LinearEffectController(1.0));
 ```
-![Demo](assets/focus_on.gif) 
 
-Move the camera to focus on a component, with optional duration and curve:
-
-```dart
-camera.focusOnComponent(component, duration: 3, curve: Curves.easeInOut);
-``` 
-
-### Move Along a Path
-
-Move the camera sequentially along a series of points:
-
-```dart
-camera.moveAlongPath(
-  [Vector2(100, 100), Vector2(200, 0), Vector2(300, 100)],
-  durationPerPoint: 0.5,
-  curve: Curves.easeInOut,
-);
-```
-![Demo](assets/move_along_path.gif) 
+---
 
 ### Chaining Multiple Effects
-You can chain multiple effects together for a sequence of camera movements:
+
+Chain multiple effects in sequence:
+
+```dart
+await camera.effectSequence([
+  () => camera.shake(10.0, LinearEffectController(0.5)),
+  () => camera.zoomTo(1.5, LinearEffectController(1.0)),
+  () => camera.rotateBy(45, LinearEffectController(0.5)),
+]);
+```
+
+---
+
+### Applying Multiple Effects Simultaneously
+
+You can apply multiple effects at the same time:
 
 ```dart
 camera
-    .shake(intensity: 10, duration: 4)
-    .then((_) => camera.zoomTo(0.25, duration: 3))
-    .then((_) => camera.focusOnComponent(component, duration: 3))
-    .then((_) => camera.rotateBy(45, duration: 2));
+  ..shake(7.0, LinearEffectController(4))
+  ..zoomTo(0.75, LinearEffectController(1.0))
+  ..rotateBy(45, LinearEffectController(1.0));
 ```
 
-### Applying Multiple Effects at Once
-You can also apply multiple effects simultaneously for more dynamic interactions:
+---
 
-```dart
-camera
-  ..shake(intensity: 7, duration: 4)
-  ..zoomTo(0.75, duration: 2)
-  ..rotateBy(90, duration: 2, curve: Curves.easeInOut);
-```
+## Why Use This Package?
 
-# Why Use This Package?
+`flame_camera_tools` makes it easy to implement smooth and dynamic camera behavior:
 
-This package allows for easy and smooth camera transitions, such as when you want to zoom in on an action, create a shake effect for a hit or explosion, or follow a character smoothly as they move through a level. The effects are customizable and can be chained to create complex camera behaviors that enhance your game's dynamic visuals.
+* Follow players or objects seamlessly.
+* Add impactful shake effects for hits, explosions, or environmental feedback.
+* Zoom and rotate for dramatic or cinematic effects.
+* Sequence and chain multiple effects for complex camera choreography.
+* Fully customizable durations, curves, and intensity for precise control.
+
+It’s a flexible, developer-friendly way to enhance the visual feel of any 2D game built with Flame.
+
+---
+
+## License
+
+MIT License. See `LICENSE` for details.
