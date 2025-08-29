@@ -1,3 +1,7 @@
+## 5.0.2
+
+* Updated Documentation.
+
 ## 5.0.1
 
 * Updated Documentation.

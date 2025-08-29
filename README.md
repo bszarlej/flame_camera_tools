@@ -106,7 +106,7 @@ await camera.zoomTo(2.0, LinearEffectController(1.0));
 
 ### Rotating
 
-Rotate the camera by a relative angle (in radians):
+Rotate the camera by a relative angle:
 
 ```dart
 await camera.rotateBy(45, LinearEffectController(1.0)); // rotate 45 degrees
