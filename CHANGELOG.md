@@ -1,3 +1,7 @@
+## 5.0.1
+
+* Updated Documentation.
+
 ## 5.0.0
 
 * Renamed `SmoothFollowBehavior` to `AdvancedFollowBehavior`.

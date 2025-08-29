@@ -112,7 +112,7 @@ Rotate the camera by a relative angle (in radians):
 await camera.rotateBy(45, LinearEffectController(1.0)); // rotate 45 degrees
 ```
 
-* `angle`: Rotation in radians.
+* `angle`: Rotation in degrees.
 * `controller`: Controls duration, curve, and smoothing.
 
 ---
