@@ -12,7 +12,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 
 ## Features
 
-* **Smooth Follow:** The camera can smoothly follow a target component with adjustable stiffness. Supports configurable deadzones and offsets.
+* **Smooth Follow:** The camera can smoothly follow a target component with adjustable stiffness. Supports configurable dead zones and offsets.
 * **Shake Effect:** Apply a randomized shake effect to the camera or any `PositionProvider`.
 * **Zooming:** Zoom in and out smoothly with optional duration and curve.
 * **Rotating:** Rotate the camera by a specified angle with optional duration and curve.
@@ -42,25 +42,26 @@ final camera = game.camera;
 
 ![Demo](assets/chase.gif)
 
-![Demo](assets/deadzone.gif)
+![Demo](assets/dead_zone.gif)
 
-Use `chase()` to make the camera follow a target with adjustable stiffness and deadzone. It returns an `AdvancedFollowBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
+Use `chase()` to make the camera follow a target with adjustable stiffness and a optional dead zone. It returns an `AdvancedFollowBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
 
 ```dart
-final followBehavior = camera.chase(component, stiffness: 0.95);
+final followOpts = camera.chase(component, stiffness: 0.95);
 
 // Later, you can adjust settings
-followBehavior.offset = Vector2(0, -50);
-followBehavior.stiffness = 0.9;
+followOpts.offset = Vector2(0, -50);
+followOpts.deadZone = CircularDeadZone(radius: 80);
+followOpts.stiffness = 0.9;
 ```
 
-Optional parameters:
+`CameraComponent.chase` parameters:
 
 ```dart
 camera.chase(
   component,
   stiffness: 0.95,
-  deadZone: RectangularDeadzone(left: 100, top: 100, right: 100, bottom: 100),
+  deadZone: RectangularDeadZone(left: 100, top: 100, right: 100, bottom: 100),
   offset: Vector2(0, -50),
   horizontalOnly: false,
   verticalOnly: false,
@@ -70,7 +71,7 @@ camera.chase(
 
 ---
 
-### Apply a Shake Effect
+### Apply camera shake
 
 Create a shake effect with specific amplitude and duration:
 

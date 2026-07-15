@@ -4,14 +4,14 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 
 import '../behaviors/advanced_follow_behavior.dart';
-import '../behaviors/deadzone.dart';
+import '../behaviors/dead_zone.dart';
 import '../effects/shake_effect.dart';
 
 extension FlameCameraTools on CameraComponent {
   /// Smoothly follows a target [ReadOnlyPositionProvider] using [AdvancedFollowBehavior].
   ///
   /// - [stiffness]: How quickly the camera follows the target (0.0–1.0).
-  /// - [deadZone]: Optional deadzone to prevent minor movements from moving the camera.
+  /// - [deadZone]: Optional dead zone to prevent camera movements within a defined area.
   /// - [offset]: Optional positional offset applied to the target.
   /// - [horizontalOnly]: If true, only follows in the horizontal direction.
   /// - [verticalOnly]: If true, only follows in the vertical direction.
@@ -21,7 +21,7 @@ extension FlameCameraTools on CameraComponent {
   AdvancedFollowBehavior chase(
     ReadOnlyPositionProvider target, {
     double stiffness = 1.0,
-    Deadzone? deadZone,
+    DeadZone? deadZone,
     Vector2? offset,
     bool horizontalOnly = false,
     bool verticalOnly = false,

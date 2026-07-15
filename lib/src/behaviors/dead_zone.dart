@@ -1,30 +1,30 @@
 import 'package:flame/components.dart';
 
-/// An interface representing a deadzone used in smooth follow behavior.
+/// An interface representing a dead zone used in smooth follow behavior.
 ///
-/// A deadzone defines a spatial threshold in which a target can move freely
+/// A dead zone defines a spatial threshold in which a target can move freely
 /// without triggering a response from the follower (typically the viewfinder).
 /// Once the target moves outside this area, the `computeDelta` method calculates
 /// the positional delta the follower should apply to track the target.
-abstract class Deadzone {
+abstract class DeadZone {
   /// Computes the delta by which the follower (owner) should move
-  /// to bring the target back within the defined deadzone.
+  /// to bring the target back within the defined dead zone.
   ///
   /// [ownerPosition] is the current position of the follower.
   /// [targetPosition] is the current position of the target being followed.
   ///
   /// Returns a [Vector2] delta that, when applied to the owner, moves it
-  /// toward the target to maintain the deadzone constraints.
+  /// toward the target to maintain the dead zone constraints.
   Vector2 computeDelta(Vector2 ownerPosition, Vector2 targetPosition);
 }
 
-/// A rectangular deadzone that defines axis-aligned bounds around the owner.
+/// A rectangular dead zone that defines axis-aligned bounds around the owner.
 ///
-/// The deadzone is specified using four distances from the center point
+/// The dead zone is specified using four distances from the center point
 /// of the owner: [left], [top], [right], and [bottom]. If the target moves
 /// beyond any of these boundaries, the `computeDelta` method returns a delta
 /// to move the owner back toward the target just enough to restore containment.
-class RectangularDeadzone implements Deadzone {
+class RectangularDeadZone implements DeadZone {
   /// Distance from the center to the left boundary.
   final double left;
 
@@ -39,11 +39,11 @@ class RectangularDeadzone implements Deadzone {
 
   final _delta = Vector2.zero();
 
-  /// Creates a rectangular deadzone with the specified edge distances.
+  /// Creates a rectangular dead zone with the specified edge distances.
   ///
-  /// All values must be non-negative. A value of `0` disables the deadzone
+  /// All values must be non-negative. A value of `0` disables the dead zone
   /// in that direction, causing the owner to immediately track the target.
-  RectangularDeadzone({
+  RectangularDeadZone({
     this.left = 0,
     this.top = 0,
     this.right = 0,
@@ -53,16 +53,16 @@ class RectangularDeadzone implements Deadzone {
           'All values must be non-negative.',
         );
 
-  /// Creates a rectangular deadzone with identical offset on all sides.
-  factory RectangularDeadzone.all(double value) =>
-      RectangularDeadzone(left: value, top: value, right: value, bottom: value);
+  /// Creates a rectangular dead zone with identical offset on all sides.
+  factory RectangularDeadZone.all(double value) =>
+      RectangularDeadZone(left: value, top: value, right: value, bottom: value);
 
-  /// Creates a rectangular deadzone with symmetrical vertical and horizontal offsets.
-  factory RectangularDeadzone.symmetric({
+  /// Creates a rectangular dead zone with symmetrical vertical and horizontal offsets.
+  factory RectangularDeadZone.symmetric({
     double vertical = 0.0,
     double horizontal = 0.0,
   }) =>
-      RectangularDeadzone(
+      RectangularDeadZone(
         left: horizontal,
         top: vertical,
         right: horizontal,
@@ -91,23 +91,23 @@ class RectangularDeadzone implements Deadzone {
   }
 }
 
-/// A circular deadzone that defines a radius around the owner.
+/// A circular dead zone that defines a radius around the owner.
 ///
 /// As long as the target remains within the specified [radius] from the
 /// owner's center, the follower will not move. Once the target exits
 /// the radius, the `computeDelta` method returns a vector that moves
-/// the owner just enough to keep the target at the edge of the deadzone.
-class CircularDeadzone implements Deadzone {
-  /// The radius of the circular deadzone.
+/// the owner just enough to keep the target at the edge of the dead zone.
+class CircularDeadZone implements DeadZone {
+  /// The radius of the circular dead zone.
   ///
-  /// Must be non-negative. A value of `0` disables the deadzone entirely.
+  /// Must be non-negative. A value of `0` disables the dead zone entirely.
   final double radius;
 
   final _delta = Vector2.zero();
   final _offset = Vector2.zero();
 
-  /// Creates a circular deadzone with the given [radius].
-  CircularDeadzone({this.radius = 0})
+  /// Creates a circular dead zone with the given [radius].
+  CircularDeadZone({this.radius = 0})
       : assert(radius >= 0, 'Radius must be non-negative.');
 
   @override

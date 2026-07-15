@@ -37,7 +37,7 @@ class FlameCameraToolsExampleGame extends FlameGame
     );
     world.add(targetBox);
 
-    // Start following the player with adjustable stiffness and deadzone
+    // Start following the player with adjustable stiffness
     followBehavior = camera.chase(player, stiffness: 0.97);
 
     // Apply a sequence of camera effects
