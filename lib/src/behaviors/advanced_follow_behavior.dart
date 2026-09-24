@@ -15,6 +15,9 @@ import 'dead_zone.dart';
 ///
 /// While often used for camera components, this behavior can be applied to any [PositionComponent].
 ///
+/// The inherited [maxSpeed] is not used; [stiffness] controls how fast the
+/// follower catches up instead.
+///
 /// Example usage with a camera:
 /// ```dart
 /// final followBehavior = AdvancedFollowBehavior(
@@ -28,14 +31,14 @@ import 'dead_zone.dart';
 class AdvancedFollowBehavior extends FollowBehavior {
   /// The area around the target within which the follower does not move.
   /// Defaults to a [CircularDeadZone] with a radius of `0` if not provided.
-  late DeadZone deadZone;
+  DeadZone deadZone;
 
   /// The positional offset applied to the target when following.
-  late Vector2 offset;
+  Vector2 offset;
 
-  late bool _horizontalOnly;
-  late bool _verticalOnly;
-  late double _stiffness;
+  bool _horizontalOnly;
+  bool _verticalOnly;
+  double _stiffness;
 
   /// Temporary vector used for delta calculations during update.
   final _tempDelta = Vector2.zero();
@@ -61,22 +64,37 @@ class AdvancedFollowBehavior extends FollowBehavior {
     super.verticalOnly,
     super.key,
     super.priority,
-  }) {
-    _horizontalOnly = super.horizontalOnly;
-    _verticalOnly = super.verticalOnly;
+  })  : deadZone = deadZone ?? CircularDeadZone(),
+        offset = offset ?? Vector2.zero(),
+        _horizontalOnly = horizontalOnly,
+        _verticalOnly = verticalOnly,
+        _stiffness = stiffness.clamp(0.0, 1.0);
 
-    this.stiffness = stiffness;
-    this.deadZone = deadZone ?? CircularDeadZone();
-    this.offset = offset ?? Vector2.zero();
+  /// If true, only follows in the horizontal direction.
+  ///
+  /// Cannot be true at the same time as [verticalOnly].
+  @override
+  bool get horizontalOnly => _horizontalOnly;
+  set horizontalOnly(bool value) {
+    assert(
+      !(value && _verticalOnly),
+      'The behavior cannot be both horizontalOnly and verticalOnly',
+    );
+    _horizontalOnly = value;
   }
 
+  /// If true, only follows in the vertical direction.
+  ///
+  /// Cannot be true at the same time as [horizontalOnly].
   @override
-  get horizontalOnly => _horizontalOnly;
-  set horizontalOnly(bool value) => _horizontalOnly = value;
-
-  @override
-  get verticalOnly => _verticalOnly;
-  set verticalOnly(bool value) => _verticalOnly = value;
+  bool get verticalOnly => _verticalOnly;
+  set verticalOnly(bool value) {
+    assert(
+      !(value && _horizontalOnly),
+      'The behavior cannot be both horizontalOnly and verticalOnly',
+    );
+    _verticalOnly = value;
+  }
 
   /// How quickly the follower moves towards the target.
   double get stiffness => _stiffness;
