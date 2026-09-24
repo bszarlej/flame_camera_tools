@@ -1,3 +1,34 @@
+## 5.1.0
+
+### Behavior changes
+
+* `ShakeEffect` now reaches its full `amplitude` on each axis. Before, it only moved up to half of it, so shakes are now twice as strong. Halve your amplitudes to keep the previous feel.
+* `ShakeEffect` is no longer a `MoveEffect`, so `camera.stop()`, `chase()` and `lookAt()` no longer cancel a running shake.
+* `ShakeEffect` no longer implements `measure()`. Speed-based controllers (`EffectController(speed: ...)`) are not supported for shakes and now trigger an assertion in debug builds. Before, they silently ended the shake immediately.
+* Futures returned by camera effects now complete when the effect is removed, one frame after it finishes.
+
+### Fixes
+
+* Futures returned by `shake`, `zoomBy`, `zoomTo`, `rotateBy` and `lookAt` now complete when the effect is cancelled, instead of never completing. `effectSequence` no longer gets stuck on a cancelled effect.
+* Starting the same kind of effect twice in one frame now replaces the first one instead of running both. The same applies to calling `chase()` twice in one frame.
+* `ShakeEffect` now adds its offset on top of the target's position, so the camera keeps following its target while shaking. The offset is undone if the shake is removed early.
+* `ShakeEffect` can now be reset without throwing a `LateInitializationError`.
+* `horizontalOnly` and `verticalOnly` now work with `CircularDeadZone`: the distance on the locked axis no longer pushes the target out of the dead zone.
+* `chase(snap: true)` now snaps to the target plus `offset`.
+* `zoomBy` now asserts that `value` is greater than `-1`.
+* Setting both `horizontalOnly` and `verticalOnly` on `AdvancedFollowBehavior` now triggers an assertion.
+* The documentation of `rotateBy` now correctly says the angle is in degrees.
+
+### Deprecations
+
+* Renamed `Deadzone`, `CircularDeadzone` and `RectangularDeadzone` to `DeadZone`, `CircularDeadZone` and `RectangularDeadZone`. The old names still work, but are deprecated and will be removed in 6.0.0.
+
+### Other
+
+* The minimum Flutter version is now 3.27.2, matching the existing Dart SDK constraint.
+* Added tests and CI, including a check against the oldest supported versions.
+* Updated the documentation, README and example.
+
 ## 5.0.2
 
 * Updated Documentation.
