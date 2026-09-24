@@ -131,3 +131,15 @@ class CircularDeadZone implements DeadZone {
     return _delta;
   }
 }
+
+/// Deprecated alias for [DeadZone].
+@Deprecated('Use DeadZone instead. Will be removed in 6.0.0.')
+typedef Deadzone = DeadZone;
+
+/// Deprecated alias for [RectangularDeadZone].
+@Deprecated('Use RectangularDeadZone instead. Will be removed in 6.0.0.')
+typedef RectangularDeadzone = RectangularDeadZone;
+
+/// Deprecated alias for [CircularDeadZone].
+@Deprecated('Use CircularDeadZone instead. Will be removed in 6.0.0.')
+typedef CircularDeadzone = CircularDeadZone;
