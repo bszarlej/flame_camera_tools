@@ -95,6 +95,29 @@ void main() {
     });
   });
 
+  group('zoomBy', () {
+    testWithFlameGame('asserts that the zoom stays positive', (game) async {
+      final camera = game.camera;
+
+      expect(
+        () => camera.zoomBy(-1, EffectController(duration: 1)),
+        throwsAssertionError,
+      );
+      expect(
+        () => camera.zoomBy(-1.5, EffectController(duration: 1)),
+        throwsAssertionError,
+      );
+    });
+
+    testWithFlameGame('zooms out by a fraction', (game) async {
+      final camera = game.camera;
+      camera.zoomBy(-0.5, EffectController(duration: 1));
+      await tick(game, 1.1);
+
+      expect(camera.viewfinder.zoom, closeTo(0.5, 1e-4));
+    });
+  });
+
   group('chase', () {
     testWithFlameGame('keeps only the last follow behavior of a frame',
         (game) async {

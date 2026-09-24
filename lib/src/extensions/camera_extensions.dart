@@ -70,10 +70,13 @@ extension FlameCameraTools on CameraComponent {
   /// Smoothly zooms the camera by a relative [value].
   ///
   /// - [value]: The relative change in zoom. For example, `0.5` increases the zoom by 50%, while `-0.5` decreases it by 50%.
+  ///   Must be greater than `-1`, since the zoom has to stay positive.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the zoom effect.
   ///
   /// Returns a [Future] that completes when the zoom finishes or is cancelled.
   Future<void> zoomBy(double value, EffectController controller) {
+    assert(value > -1, 'zoomBy value must be greater than -1: $value');
+
     _removeEffects<ScaleEffect>();
 
     return _add(ScaleEffect.by(Vector2.all(1 + value), controller));
