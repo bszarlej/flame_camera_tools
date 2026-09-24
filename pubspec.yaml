@@ -5,7 +5,7 @@ repository: https://github.com/bszarlej/flame_camera_tools.git
 
 environment:
   sdk: ^3.6.1
-  flutter: ">=1.17.0"
+  flutter: ">=3.27.2"
 
 dependencies:
   flutter:
@@ -13,7 +13,7 @@ dependencies:
   flame: ^1.23.0
 
 dev_dependencies:
-  flame_test: ^2.3.1
+  flame_test: ">=1.17.4 <3.0.0"
   flutter_lints: ">=5.0.0 <7.0.0"
   flutter_test:
     sdk: flutter

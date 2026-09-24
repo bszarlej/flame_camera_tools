@@ -31,3 +31,23 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
+  minimum-versions:
+    # Tests against the oldest versions allowed by pubspec.yaml, so that its
+    # lower bounds stay honest. Keep flutter-version in sync with the
+    # `flutter` constraint there.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.27.2
+          channel: stable
+          cache: true
+
+      - name: Install minimum dependencies
+        run: flutter pub downgrade
+
+      - name: Run tests
+        run: flutter test
