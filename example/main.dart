@@ -14,11 +14,11 @@ void main() {
   );
 }
 
+/// Move with WASD, press Space to shake the camera.
 class FlameCameraToolsExampleGame extends FlameGame
     with HasKeyboardHandlerComponents {
   late final Player player;
   late final AdvancedFollowBehavior followBehavior;
-  late final RectangleComponent targetBox;
 
   @override
   FutureOr<void> onLoad() async {
@@ -28,17 +28,23 @@ class FlameCameraToolsExampleGame extends FlameGame
     player = Player(size: Vector2.all(50));
     world.add(player);
 
-    // Add a target component to demonstrate focus
-    targetBox = RectangleComponent(
-      position: Vector2(500, 300),
-      size: Vector2.all(100),
-      paint: Paint()..color = Colors.blue,
-      anchor: Anchor.center,
+    // Add a fixed landmark, so the camera movement is visible
+    world.add(
+      RectangleComponent(
+        position: Vector2(100, 100),
+        size: Vector2.all(100),
+        paint: Paint()..color = Colors.blue,
+        anchor: Anchor.center,
+      ),
     );
-    world.add(targetBox);
 
-    // Start following the player with adjustable stiffness
-    followBehavior = camera.chase(player, stiffness: 0.97);
+    // Follow the player smoothly. The player can move freely inside the
+    // dead zone before the camera starts following.
+    followBehavior = camera.chase(
+      player,
+      stiffness: 0.97,
+      deadZone: RectangularDeadZone.symmetric(horizontal: 80, vertical: 48),
+    );
 
     // Apply a sequence of camera effects
     camera.effectSequence([
@@ -55,6 +61,7 @@ class Player extends RectangleComponent
     with KeyboardHandler, HasGameReference<FlameCameraToolsExampleGame> {
   Set<LogicalKeyboardKey> _keys = {};
   final double _movementSpeed = 300;
+  final _direction = Vector2.zero();
 
   Player({super.position, super.size})
       : super(anchor: Anchor.center, paint: Paint()..color = Colors.red);
@@ -62,6 +69,11 @@ class Player extends RectangleComponent
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     _keys = keysPressed;
+
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.space) {
+      game.camera.shake(10, EffectController(duration: 0.4));
+    }
+
     return super.onKeyEvent(event, keysPressed);
   }
 
@@ -69,20 +81,21 @@ class Player extends RectangleComponent
   void update(double dt) {
     super.update(dt);
 
-    final direction = Vector2.zero();
+    _direction.setZero();
 
-    if (_keys.contains(LogicalKeyboardKey.keyW)) direction.y = -1;
-    if (_keys.contains(LogicalKeyboardKey.keyA)) direction.x = -1;
-    if (_keys.contains(LogicalKeyboardKey.keyS)) direction.y = 1;
-    if (_keys.contains(LogicalKeyboardKey.keyD)) direction.x = 1;
+    if (_keys.contains(LogicalKeyboardKey.keyW)) _direction.y = -1;
+    if (_keys.contains(LogicalKeyboardKey.keyA)) _direction.x = -1;
+    if (_keys.contains(LogicalKeyboardKey.keyS)) _direction.y = 1;
+    if (_keys.contains(LogicalKeyboardKey.keyD)) _direction.x = 1;
 
-    // Update camera follow offset dynamically based on movement
-    if (!direction.isZero()) {
-      direction.normalize();
-      position += direction * _movementSpeed * dt;
+    if (!_direction.isZero()) {
+      _direction.normalize();
+      position.addScaled(_direction, _movementSpeed * dt);
     }
 
-    // Adjust camera offset based on the players direction
-    game.followBehavior.offset = direction.normalized().scaled(192);
+    // Look ahead in the direction the player is moving
+    game.followBehavior.offset
+      ..setFrom(_direction)
+      ..scale(192);
   }
 }
