@@ -1,9 +1,19 @@
+import 'dart:async';
+
+import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 
 import '../behaviors/advanced_follow_behavior.dart';
 import '../behaviors/dead_zone.dart';
 import '../effects/shake_effect.dart';
+
+/// Components added by [FlameCameraTools] that are not mounted yet, with the
+/// completers of the futures returned for them.
+///
+/// Flame only lists a child in `children` once it is mounted, so a component
+/// added in the current frame has to be tracked here to be replaceable.
+final _pending = Expando<Map<Component, Completer<void>>>();
 
 extension FlameCameraTools on CameraComponent {
   /// Smoothly follows a target [ReadOnlyPositionProvider] using [AdvancedFollowBehavior].
@@ -25,7 +35,7 @@ extension FlameCameraTools on CameraComponent {
     bool verticalOnly = false,
     bool snap = false,
   }) {
-    stop();
+    _stop();
 
     final advancedFollowBehavior = AdvancedFollowBehavior(
       target: target,
@@ -36,7 +46,7 @@ extension FlameCameraTools on CameraComponent {
       verticalOnly: verticalOnly,
     );
 
-    viewfinder.add(advancedFollowBehavior);
+    _add(advancedFollowBehavior);
 
     if (snap) viewfinder.position = target.position;
 
@@ -52,7 +62,7 @@ extension FlameCameraTools on CameraComponent {
   Future<void> shake(double amplitude, EffectController controller) {
     _removeEffects<ShakeEffect>();
 
-    return _play(ShakeEffect(amplitude, controller));
+    return _add(ShakeEffect(amplitude, controller));
   }
 
   /// Smoothly zooms the camera by a relative [value].
@@ -64,7 +74,7 @@ extension FlameCameraTools on CameraComponent {
   Future<void> zoomBy(double value, EffectController controller) {
     _removeEffects<ScaleEffect>();
 
-    return _play(ScaleEffect.by(Vector2.all(1 + value), controller));
+    return _add(ScaleEffect.by(Vector2.all(1 + value), controller));
   }
 
   /// Smoothly zooms the camera to an absolute zoom level [value].
@@ -78,7 +88,7 @@ extension FlameCameraTools on CameraComponent {
 
     _removeEffects<ScaleEffect>();
 
-    return _play(ScaleEffect.to(Vector2.all(value), controller));
+    return _add(ScaleEffect.to(Vector2.all(value), controller));
   }
 
   /// Rotates the camera by a relative [angle] in radians.
@@ -90,7 +100,7 @@ extension FlameCameraTools on CameraComponent {
   Future<void> rotateBy(double angle, EffectController controller) {
     _removeEffects<RotateEffect>();
 
-    return _play(RotateEffect.by(radians(angle), controller));
+    return _add(RotateEffect.by(radians(angle), controller));
   }
 
   /// Moves the camera directly to a [targetPosition].
@@ -100,9 +110,9 @@ extension FlameCameraTools on CameraComponent {
   ///
   /// Returns a [Future] that completes when the movement finishes or is cancelled.
   Future<void> lookAt(Vector2 targetPosition, EffectController controller) {
-    stop();
+    _stop();
 
-    return _play(MoveToEffect(targetPosition, controller));
+    return _add(MoveToEffect(targetPosition, controller));
   }
 
   /// Plays a sequence of camera effects in order.
@@ -124,18 +134,52 @@ extension FlameCameraTools on CameraComponent {
     }
   }
 
-  /// Adds [effect] to the viewfinder and returns a [Future] that completes
-  /// once the effect is removed, whether it finished or was cancelled.
-  Future<void> _play(Effect effect) {
-    viewfinder.add(effect);
-    return effect.removed;
+  /// Adds [component] to the viewfinder and returns a [Future] that completes
+  /// once it is removed, whether it finished or was cancelled.
+  Future<void> _add(Component component) {
+    final completer = Completer<void>();
+    final pending = _pending[this] ??= {};
+
+    pending[component] = completer;
+    component.mounted.then((_) => pending.remove(component));
+    component.removed.then((_) {
+      if (!completer.isCompleted) completer.complete();
+    });
+
+    viewfinder.add(component);
+    return completer.future;
   }
 
+  /// Like [CameraComponent.stop], but also cancels follow behaviors and move
+  /// effects added in the current frame.
+  void _stop() {
+    stop();
+    _cancelPending(
+        (component) => component is FollowBehavior || component is MoveEffect);
+  }
+
+  /// Removes every [T] from the viewfinder, including ones added in the
+  /// current frame.
   void _removeEffects<T>() {
     viewfinder.children.toList().forEach(
       (child) {
         if (child is T) child.removeFromParent();
       },
     );
+    _cancelPending((component) => component is T);
+  }
+
+  /// Cancels the not yet mounted components matching [test].
+  ///
+  /// Flame never marks such a component as removed, so its future is
+  /// completed here instead.
+  void _cancelPending(bool Function(Component component) test) {
+    _pending[this]?.removeWhere((component, completer) {
+      if (!test(component)) return false;
+
+      component.removeFromParent();
+      if (!completer.isCompleted) completer.complete();
+      return true;
+    });
   }
 }

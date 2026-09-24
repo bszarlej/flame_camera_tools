@@ -1,3 +1,4 @@
+import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
@@ -54,7 +55,59 @@ void main() {
         expect(first(), isTrue);
         expect(second(), isFalse);
       });
+
+      testWithFlameGame('$name replaces a $name started in the same frame',
+          (game) async {
+        final first = track(play(game.camera));
+        final second = track(play(game.camera));
+        await tick(game, 0.1);
+
+        expect(first(), isTrue);
+        expect(second(), isFalse);
+      });
     }
+
+    testWithFlameGame('only the last zoomTo in a frame takes effect',
+        (game) async {
+      final camera = game.camera;
+      camera.zoomTo(2, EffectController(duration: 1));
+      camera.zoomTo(3, EffectController(duration: 1));
+
+      // Several steps, so that two stacked effects would both be mid-way.
+      for (var i = 0; i < 4; i++) {
+        await tick(game, 0.3);
+      }
+
+      expect(camera.viewfinder.zoom, closeTo(3, 1e-4));
+    });
+
+    testWithFlameGame('lookAt completes when chase starts in the same frame',
+        (game) async {
+      final camera = game.camera;
+      final done = track(
+        camera.lookAt(Vector2(100, 100), EffectController(duration: 1)),
+      );
+      camera.chase(PositionComponent());
+      await tick(game, 0.1);
+
+      expect(done(), isTrue);
+      expect(camera.viewfinder.children.whereType<MoveEffect>(), isEmpty);
+    });
+  });
+
+  group('chase', () {
+    testWithFlameGame('keeps only the last follow behavior of a frame',
+        (game) async {
+      final camera = game.camera;
+      camera.chase(PositionComponent());
+      final last = camera.chase(PositionComponent());
+      await tick(game, 0.1);
+
+      expect(
+        camera.viewfinder.children.whereType<FollowBehavior>(),
+        [last],
+      );
+    });
 
     testWithFlameGame('lookAt completes when chase takes over', (game) async {
       final camera = game.camera;
