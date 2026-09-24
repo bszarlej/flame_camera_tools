@@ -40,6 +40,9 @@ class AdvancedFollowBehavior extends FollowBehavior {
   /// Temporary vector used for delta calculations during update.
   final _tempDelta = Vector2.zero();
 
+  /// Temporary vector holding the point being followed during update.
+  final _tempTarget = Vector2.zero();
+
   /// Creates an [AdvancedFollowBehavior].
   ///
   /// - [stiffness]: Controls how quickly the follower moves towards the target. Clamped between 0.0 and 1.0.
@@ -84,9 +87,18 @@ class AdvancedFollowBehavior extends FollowBehavior {
   /// Updates the follower's position based on the target, deadZone, offset, and stiffness.
   @override
   void update(double dt) {
-    _tempDelta.setFrom(
-        deadZone.computeDelta(owner.position, target.position + offset));
+    _tempTarget
+      ..setFrom(target.position)
+      ..add(offset);
 
+    // Lock the ignored axis before the dead zone check, so the distance on
+    // that axis can't count towards leaving the dead zone.
+    if (_horizontalOnly) _tempTarget.y = owner.position.y;
+    if (_verticalOnly) _tempTarget.x = owner.position.x;
+
+    _tempDelta.setFrom(deadZone.computeDelta(owner.position, _tempTarget));
+
+    // Custom dead zones may still return movement on a locked axis.
     if (_horizontalOnly) _tempDelta.y = 0;
     if (_verticalOnly) _tempDelta.x = 0;
 
