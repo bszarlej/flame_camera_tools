@@ -23,7 +23,7 @@ extension FlameCameraTools on CameraComponent {
   /// - [offset]: Optional positional offset applied to the target.
   /// - [horizontalOnly]: If true, only follows in the horizontal direction.
   /// - [verticalOnly]: If true, only follows in the vertical direction.
-  /// - [snap]: If true, immediately moves the camera to the target's position.
+  /// - [snap]: If true, immediately moves the camera to the target's position plus [offset].
   ///
   /// Returns the [AdvancedFollowBehavior] instance, allowing later adjustments to its settings.
   AdvancedFollowBehavior chase(
@@ -48,7 +48,9 @@ extension FlameCameraTools on CameraComponent {
 
     _add(advancedFollowBehavior);
 
-    if (snap) viewfinder.position = target.position;
+    if (snap) {
+      viewfinder.position = target.position + advancedFollowBehavior.offset;
+    }
 
     return advancedFollowBehavior;
   }

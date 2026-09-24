@@ -109,6 +109,29 @@ void main() {
       );
     });
 
+    testWithFlameGame('snap moves straight to the target', (game) async {
+      final camera = game.camera;
+      camera.chase(
+        PositionComponent(position: Vector2(100, 50)),
+        stiffness: 0,
+        snap: true,
+      );
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(100, 50)));
+    });
+
+    testWithFlameGame('snap includes the offset', (game) async {
+      final camera = game.camera;
+      camera.chase(
+        PositionComponent(position: Vector2(100, 50)),
+        stiffness: 0,
+        offset: Vector2(0, -30),
+        snap: true,
+      );
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(100, 20)));
+    });
+
     testWithFlameGame('lookAt completes when chase takes over', (game) async {
       final camera = game.camera;
       final done = track(
