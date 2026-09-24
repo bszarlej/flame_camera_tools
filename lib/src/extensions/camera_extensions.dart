@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 
@@ -50,21 +48,11 @@ extension FlameCameraTools on CameraComponent {
   /// - [amplitude]: Maximum shake offset in pixels.
   /// - [controller]: Defines the duration, progression curve, and damping of the shake effect.
   ///
-  /// Returns a [Future] that completes when the shake finishes.
+  /// Returns a [Future] that completes when the shake finishes or is cancelled.
   Future<void> shake(double amplitude, EffectController controller) {
     _removeEffects<ShakeEffect>();
 
-    final completer = Completer();
-
-    viewfinder.add(
-      ShakeEffect(
-        amplitude,
-        controller,
-        onComplete: completer.complete,
-      ),
-    );
-
-    return completer.future;
+    return _play(ShakeEffect(amplitude, controller));
   }
 
   /// Smoothly zooms the camera by a relative [value].
@@ -72,21 +60,11 @@ extension FlameCameraTools on CameraComponent {
   /// - [value]: The relative change in zoom. For example, `0.5` increases the zoom by 50%, while `-0.5` decreases it by 50%.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the zoom effect.
   ///
-  /// Returns a [Future] that completes when the zoom finishes.
+  /// Returns a [Future] that completes when the zoom finishes or is cancelled.
   Future<void> zoomBy(double value, EffectController controller) {
     _removeEffects<ScaleEffect>();
 
-    final completer = Completer();
-
-    viewfinder.add(
-      ScaleEffect.by(
-        Vector2.all(1 + value),
-        controller,
-        onComplete: completer.complete,
-      ),
-    );
-
-    return completer.future;
+    return _play(ScaleEffect.by(Vector2.all(1 + value), controller));
   }
 
   /// Smoothly zooms the camera to an absolute zoom level [value].
@@ -94,23 +72,13 @@ extension FlameCameraTools on CameraComponent {
   /// - [value]: Target zoom level (must be positive).
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the zoom effect.
   ///
-  /// Returns a [Future] that completes when the zoom finishes.
+  /// Returns a [Future] that completes when the zoom finishes or is cancelled.
   Future<void> zoomTo(double value, EffectController controller) {
     assert(value > 0, 'zoom level must be positive: $value');
 
     _removeEffects<ScaleEffect>();
 
-    final completer = Completer();
-
-    viewfinder.add(
-      ScaleEffect.to(
-        Vector2.all(value),
-        controller,
-        onComplete: completer.complete,
-      ),
-    );
-
-    return completer.future;
+    return _play(ScaleEffect.to(Vector2.all(value), controller));
   }
 
   /// Rotates the camera by a relative [angle] in radians.
@@ -118,21 +86,11 @@ extension FlameCameraTools on CameraComponent {
   /// - [angle]: Amount to rotate the camera by in radians.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
   ///
-  /// Returns a [Future] that completes when the rotation finishes.
+  /// Returns a [Future] that completes when the rotation finishes or is cancelled.
   Future<void> rotateBy(double angle, EffectController controller) {
     _removeEffects<RotateEffect>();
 
-    final completer = Completer();
-
-    viewfinder.add(
-      RotateEffect.by(
-        radians(angle),
-        controller,
-        onComplete: completer.complete,
-      ),
-    );
-
-    return completer.future;
+    return _play(RotateEffect.by(radians(angle), controller));
   }
 
   /// Moves the camera directly to a [targetPosition].
@@ -140,21 +98,11 @@ extension FlameCameraTools on CameraComponent {
   /// - [targetPosition]: The position to move the camera to.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the movement.
   ///
-  /// Returns a [Future] that completes when the movement finishes.
+  /// Returns a [Future] that completes when the movement finishes or is cancelled.
   Future<void> lookAt(Vector2 targetPosition, EffectController controller) {
     stop();
 
-    final completer = Completer();
-
-    viewfinder.add(
-      MoveToEffect(
-        targetPosition,
-        controller,
-        onComplete: completer.complete,
-      ),
-    );
-
-    return completer.future;
+    return _play(MoveToEffect(targetPosition, controller));
   }
 
   /// Plays a sequence of camera effects in order.
@@ -174,6 +122,13 @@ extension FlameCameraTools on CameraComponent {
     for (final effect in effects) {
       await effect();
     }
+  }
+
+  /// Adds [effect] to the viewfinder and returns a [Future] that completes
+  /// once the effect is removed, whether it finished or was cancelled.
+  Future<void> _play(Effect effect) {
+    viewfinder.add(effect);
+    return effect.removed;
   }
 
   void _removeEffects<T>() {
