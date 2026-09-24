@@ -15,6 +15,23 @@ import '../effects/shake_effect.dart';
 /// added in the current frame has to be tracked here to be replaceable.
 final _pending = Expando<Map<Component, Completer<void>>>();
 
+/// Camera helpers for Flame's [CameraComponent].
+///
+/// Adds smooth following with [chase], camera effects with [shake], [zoomBy],
+/// [zoomTo], [rotateBy] and [lookAt], and chaining with [effectSequence].
+///
+/// Starting an effect replaces a running effect of the same kind: a new zoom
+/// replaces the current zoom, a new shake the current shake, and so on.
+/// [chase] and [lookAt] also stop any active following or camera movement.
+///
+/// Each effect method returns a [Future] that completes when the effect
+/// finishes or is cancelled, so effects can be awaited or chained:
+///
+/// ```dart
+/// camera.chase(player, stiffness: 0.9);
+/// await camera.zoomTo(1.5, EffectController(duration: 1));
+/// await camera.shake(10, EffectController(duration: 0.5));
+/// ```
 extension FlameCameraTools on CameraComponent {
   /// Smoothly follows a target [ReadOnlyPositionProvider] using [AdvancedFollowBehavior].
   ///

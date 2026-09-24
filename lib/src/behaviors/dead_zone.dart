@@ -14,7 +14,14 @@ abstract class DeadZone {
   /// [targetPosition] is the current position of the target being followed.
   ///
   /// Returns a [Vector2] delta that, when applied to the owner, moves it
-  /// toward the target to maintain the dead zone constraints.
+  /// toward the target to maintain the dead zone constraints. The delta is
+  /// zero while the target is inside the dead zone.
+  ///
+  /// This is called every frame, so the built-in dead zones return the same
+  /// vector from every call to avoid allocating a new one, and overwrite it
+  /// on the next call. Copy the result with [Vector2.clone] if you need to
+  /// keep it. Custom implementations may do the same, but must not modify
+  /// [ownerPosition] or [targetPosition].
   Vector2 computeDelta(Vector2 ownerPosition, Vector2 targetPosition);
 }
 
