@@ -96,9 +96,9 @@ extension FlameCameraTools on CameraComponent {
     return _add(ScaleEffect.to(Vector2.all(value), controller));
   }
 
-  /// Rotates the camera by a relative [angle] in radians.
+  /// Rotates the camera by a relative [angle] in degrees.
   ///
-  /// - [angle]: Amount to rotate the camera by in radians.
+  /// - [angle]: Amount to rotate the camera by in degrees.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
   ///
   /// Returns a [Future] that completes when the rotation finishes or is cancelled.

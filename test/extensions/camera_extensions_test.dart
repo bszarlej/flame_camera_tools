@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -115,6 +117,16 @@ void main() {
       await tick(game, 1.1);
 
       expect(camera.viewfinder.zoom, closeTo(0.5, 1e-4));
+    });
+  });
+
+  group('rotateBy', () {
+    testWithFlameGame('takes the angle in degrees', (game) async {
+      final camera = game.camera;
+      camera.rotateBy(90, EffectController(duration: 1));
+      await tick(game, 1.1);
+
+      expect(camera.viewfinder.angle, closeTo(pi / 2, 1e-4));
     });
   });
 
