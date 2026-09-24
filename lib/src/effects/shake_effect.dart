@@ -8,6 +8,13 @@ import 'package:flame/effects.dart';
 /// The shake amplitude decreases over time according to the [EffectController]'s progress,
 /// creating a damping effect. This is commonly used for camera shake or object hit reactions.
 ///
+/// The offset is applied on top of the target's position, so the target can
+/// keep moving while it shakes, for example while a camera follows a player.
+/// The offset is undone when the effect finishes or is removed.
+///
+/// Speed-based controllers such as `EffectController(speed: ...)` are not
+/// supported, since a shake has no distance to cover. Use a duration instead.
+///
 /// Example usage:
 /// ```dart
 /// final shake = ShakeEffect(
@@ -16,12 +23,12 @@ import 'package:flame/effects.dart';
 /// );
 /// player.add(shake);
 /// ```
-class ShakeEffect extends MoveEffect {
+class ShakeEffect extends Effect with EffectTarget<PositionProvider> {
   /// Maximum displacement applied to the target's position at the start of the effect.
   final double amplitude;
 
-  /// The original position of the target before the shake started.
-  late final Vector2 _origin;
+  /// The offset currently applied to the target's position.
+  final _offset = Vector2.zero();
 
   /// Random number generator used to generate the shake offsets.
   final _rng = Random();
@@ -34,17 +41,12 @@ class ShakeEffect extends MoveEffect {
   /// - [onComplete]: Optional callback invoked when the effect finishes.
   ShakeEffect(
     this.amplitude,
-    EffectController controller, {
+    super.controller, {
     PositionProvider? target,
     super.onComplete,
     super.key,
-  }) : super(controller, target);
-
-  @override
-  void onStart() {
-    super.onStart();
-    // Store the original position to offset from during the shake
-    _origin = target.position.clone();
+  }) {
+    this.target = target;
   }
 
   @override
@@ -53,15 +55,20 @@ class ShakeEffect extends MoveEffect {
     final currentAmp = amplitude * (1.0 - progress);
 
     // Generate a random offset in both x and y directions
-    final offset = Vector2(
-      _rng.nextDouble() * currentAmp - currentAmp / 2,
-      _rng.nextDouble() * currentAmp - currentAmp / 2,
-    );
+    final dx = _rng.nextDouble() * currentAmp - currentAmp / 2;
+    final dy = _rng.nextDouble() * currentAmp - currentAmp / 2;
 
-    // Apply the offset relative to the original position
-    target.position = _origin + offset;
+    // Replace the previous offset with the new one
+    target.position += Vector2(dx - _offset.x, dy - _offset.y);
+    _offset.setValues(dx, dy);
   }
 
   @override
-  double measure() => controller.progress;
+  void onRemove() {
+    if (!_offset.isZero()) {
+      target.position -= _offset;
+      _offset.setZero();
+    }
+    super.onRemove();
+  }
 }
