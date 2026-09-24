@@ -24,7 +24,7 @@ import 'package:flame/effects.dart';
 /// player.add(shake);
 /// ```
 class ShakeEffect extends Effect with EffectTarget<PositionProvider> {
-  /// Maximum displacement applied to the target's position at the start of the effect.
+  /// Maximum displacement along each axis at the start of the effect.
   final double amplitude;
 
   /// The offset currently applied to the target's position.
@@ -35,7 +35,7 @@ class ShakeEffect extends Effect with EffectTarget<PositionProvider> {
 
   /// Creates a [ShakeEffect].
   ///
-  /// - [amplitude]: The maximum shake displacement in pixels.
+  /// - [amplitude]: The maximum shake displacement along each axis in pixels.
   /// - [controller]: Controls the duration and timing of the effect.
   /// - [target]: Optional custom target to apply the effect to (defaults to the component this effect is added to).
   /// - [onComplete]: Optional callback invoked when the effect finishes.
@@ -54,9 +54,9 @@ class ShakeEffect extends Effect with EffectTarget<PositionProvider> {
     // Amplitude decreases over time for a damping effect
     final currentAmp = amplitude * (1.0 - progress);
 
-    // Generate a random offset in both x and y directions
-    final dx = _rng.nextDouble() * currentAmp - currentAmp / 2;
-    final dy = _rng.nextDouble() * currentAmp - currentAmp / 2;
+    // Generate a random offset between -currentAmp and currentAmp on each axis
+    final dx = (_rng.nextDouble() * 2 - 1) * currentAmp;
+    final dy = (_rng.nextDouble() * 2 - 1) * currentAmp;
 
     // Replace the previous offset with the new one
     target.position += Vector2(dx - _offset.x, dy - _offset.y);

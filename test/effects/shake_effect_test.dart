@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
@@ -40,6 +42,23 @@ void main() {
         expect((component.x - 10).abs(), lessThanOrEqualTo(10 + epsilon));
         expect((component.y - 20).abs(), lessThanOrEqualTo(10 + epsilon));
       }
+    });
+
+    testWithFlameGame('uses the full amplitude', (game) async {
+      final component = PositionComponent(position: Vector2(10, 20));
+      await game.ensureAdd(component);
+
+      component.add(ShakeEffect(10, EffectController(duration: 1)));
+      var furthest = 0.0;
+      // Early on the amplitude is still >= 9, so an offset past 5 on either
+      // axis is near-certain within these samples, yet impossible at half.
+      for (var i = 0; i < 100; i++) {
+        await tick(game, 0.001);
+        furthest = max(furthest, (component.x - 10).abs());
+        furthest = max(furthest, (component.y - 20).abs());
+      }
+
+      expect(furthest, greaterThan(5));
     });
 
     testWithFlameGame('keeps movement from other sources', (game) async {
