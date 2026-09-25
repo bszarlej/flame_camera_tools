@@ -30,6 +30,8 @@ void main() {
       'zoomTo': (camera) => camera.zoomTo(2, EffectController(duration: 1)),
       'rotateBy': (camera) =>
           camera.rotateBy(45, EffectController(duration: 1)),
+      'rotateTo': (camera) =>
+          camera.rotateTo(45, EffectController(duration: 1)),
       'lookAt': (camera) =>
           camera.lookAt(Vector2(100, 100), EffectController(duration: 1)),
     };
@@ -127,6 +129,43 @@ void main() {
       await tick(game, 1.1);
 
       expect(camera.viewfinder.angle, closeTo(pi / 2, 1e-4));
+    });
+  });
+
+  group('rotateTo', () {
+    testWithFlameGame('ends at the given angle in degrees', (game) async {
+      final camera = game.camera;
+      camera.rotateBy(30, EffectController(duration: 0.1));
+      await tick(game, 0.2);
+
+      camera.rotateTo(90, EffectController(duration: 1));
+      await tick(game, 1.1);
+
+      expect(camera.viewfinder.angle, closeTo(pi / 2, 1e-4));
+    });
+
+    testWithFlameGame('replaces a running rotateBy', (game) async {
+      final camera = game.camera;
+      camera.rotateBy(90, EffectController(duration: 10));
+      await tick(game, 1);
+
+      camera.rotateTo(0, EffectController(duration: 1));
+      await tick(game, 1.1);
+      await tick(game, 1);
+
+      expect(camera.viewfinder.angle, closeTo(0, 1e-4));
+    });
+
+    testWithFlameGame('does not take the shortest way round', (game) async {
+      final camera = game.camera;
+      camera.rotateBy(350, EffectController(duration: 0.1));
+      await tick(game, 0.2);
+
+      camera.rotateTo(0, EffectController(duration: 1));
+      await tick(game, 0.5);
+
+      // Halfway back from 350 is 175, not 355.
+      expect(camera.viewfinder.angle, closeTo(radians(175), 1e-4));
     });
   });
 

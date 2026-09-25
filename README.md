@@ -15,7 +15,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 * **Smooth Follow:** The camera can smoothly follow any target with adjustable stiffness. Supports configurable dead zones and offsets.
 * **Shake Effect:** Apply a randomized shake effect to the camera or any `PositionProvider`. The shake works on top of following, so the camera keeps tracking its target while it shakes.
 * **Zooming:** Zoom in and out, either relative to the current zoom or to an absolute zoom level.
-* **Rotating:** Rotate the camera by a specified angle.
+* **Rotating:** Rotate the camera by a specified angle or to an absolute angle.
 * **Moving:** Move the camera to a specific position.
 * **Customizable Effects:** Every effect takes an `EffectController`, which controls its duration and easing curve.
 * **Chaining Effects:** Sequence multiple effects using `Future`s for smooth transitions.
@@ -157,10 +157,18 @@ Rotate the camera by a relative angle:
 await camera.rotateBy(45, LinearEffectController(1.0)); // rotate 45 degrees
 ```
 
-* `angle`: Rotation in degrees.
+Or rotate to an absolute angle:
+
+```dart
+await camera.rotateTo(0, LinearEffectController(1.0)); // back to upright
+```
+
+* `angle`: Relative rotation or absolute angle in degrees.
 * `controller`: Controls duration, curve, and smoothing.
 
-> **Note:** Unlike most of Flame, which uses radians, `rotateBy` takes degrees. Pass `45` rather than `pi / 4`.
+`rotateTo` rotates by the difference to the current angle, without taking the shortest way round: from `350` to `0` it turns back 350 degrees rather than forward 10.
+
+> **Note:** Unlike most of Flame, which uses radians, `rotateBy` and `rotateTo` take degrees. Pass `45` rather than `pi / 4`.
 
 ---
 
