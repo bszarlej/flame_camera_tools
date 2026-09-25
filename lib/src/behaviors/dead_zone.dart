@@ -6,7 +6,7 @@ import 'package:flame/components.dart';
 /// without triggering a response from the follower (typically the viewfinder).
 /// Once the target moves outside this area, the `computeDelta` method calculates
 /// the positional delta the follower should apply to track the target.
-abstract class DeadZone {
+abstract interface class DeadZone {
   /// Computes the delta by which the follower (owner) should move
   /// to bring the target back within the defined dead zone.
   ///
