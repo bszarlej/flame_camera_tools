@@ -131,7 +131,3 @@ class ChaseBehavior extends FollowBehavior {
     if (!_tempDelta.isZero()) owner.position += _tempDelta;
   }
 }
-
-/// Deprecated alias for [ChaseBehavior].
-@Deprecated('Use ChaseBehavior instead. Will be removed in 6.0.0.')
-typedef AdvancedFollowBehavior = ChaseBehavior;
