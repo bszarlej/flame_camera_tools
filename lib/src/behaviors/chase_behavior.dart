@@ -4,6 +4,8 @@ import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 
 import 'dead_zone.dart';
+import 'target_group.dart';
+import 'zoom_to_fit.dart';
 
 /// A behavior that makes its parent chase a target.
 ///
@@ -27,6 +29,10 @@ import 'dead_zone.dart';
 /// );
 /// ```
 ///
+/// To chase several targets, pass a [TargetGroup] as the target. On a
+/// camera's [Viewfinder], [zoomToFit] then also zooms so that the whole group
+/// stays in view.
+///
 /// The inherited [maxSpeed] is not used; [stiffness] controls how fast the
 /// follower catches up instead.
 class ChaseBehavior extends FollowBehavior {
@@ -36,6 +42,13 @@ class ChaseBehavior extends FollowBehavior {
 
   /// The positional offset applied to the target when following.
   Vector2 offset;
+
+  /// If set, zooms the camera so that the whole [TargetGroup] stays in view,
+  /// with the same [stiffness] as the movement.
+  ///
+  /// Only works when the target is a [TargetGroup] and the behavior is added
+  /// to a camera's [Viewfinder].
+  ZoomToFit? zoomToFit;
 
   bool _horizontalOnly;
   bool _verticalOnly;
@@ -52,20 +65,27 @@ class ChaseBehavior extends FollowBehavior {
   /// - [stiffness]: Controls how quickly the follower moves towards the target. Clamped between 0.0 and 1.0; see [stiffness] for the scale.
   /// - [deadZone]: Optional dead zone area; defaults to a [CircularDeadZone] with a radius of 0.
   /// - [offset]: Optional offset applied to the target's position.
-  /// - [target]: The [ReadOnlyPositionProvider] to follow, such as a component.
+  /// - [target]: The [ReadOnlyPositionProvider] to follow, such as a component
+  ///   or a [TargetGroup].
   /// - [horizontalOnly]: If true, only follows in the horizontal direction.
   /// - [verticalOnly]: If true, only follows in the vertical direction.
+  /// - [zoomToFit]: Optional zoom settings to keep a [TargetGroup] in view.
   ChaseBehavior({
     double stiffness = 1.0,
     DeadZone? deadZone,
     Vector2? offset,
+    this.zoomToFit,
     required super.target,
     super.owner,
     super.horizontalOnly,
     super.verticalOnly,
     super.key,
     super.priority,
-  })  : deadZone = deadZone ?? CircularDeadZone(),
+  })  : assert(
+          zoomToFit == null || target is TargetGroup,
+          'zoomToFit needs a TargetGroup as the target',
+        ),
+        deadZone = deadZone ?? CircularDeadZone(),
         offset = offset ?? Vector2.zero(),
         _horizontalOnly = horizontalOnly,
         _verticalOnly = verticalOnly,
@@ -118,8 +138,15 @@ class ChaseBehavior extends FollowBehavior {
   }
 
   /// Updates the follower's position based on the target, deadZone, offset, and stiffness.
+  ///
+  /// While the target is an empty [TargetGroup], the follower stays where it
+  /// is.
   @override
   void update(double dt) {
+    final target = this.target;
+
+    if (target is TargetGroup && target.isEmpty) return;
+
     _tempTarget
       ..setFrom(target.position)
       ..add(offset);
@@ -143,6 +170,29 @@ class ChaseBehavior extends FollowBehavior {
       _tempDelta.scale(deltaOffset / distance);
     }
     if (!_tempDelta.isZero()) owner.position += _tempDelta;
+
+    final zoomToFit = this.zoomToFit;
+    if (zoomToFit != null) _updateZoom(zoomToFit, lerpFactor);
+  }
+
+  /// Moves the zoom of the viewfinder towards the level [zoomToFit] asks for.
+  void _updateZoom(ZoomToFit zoomToFit, double lerpFactor) {
+    final target = this.target;
+    final viewfinder = owner;
+    assert(target is TargetGroup, 'zoomToFit needs a TargetGroup as target');
+    assert(viewfinder is Viewfinder, 'zoomToFit only works on a Viewfinder');
+    if (target is! TargetGroup || viewfinder is! Viewfinder) return;
+
+    final zoom = zoomToFit.zoomFor(
+      target,
+      viewfinder.position,
+      viewfinder.camera.viewport.virtualSize,
+    );
+    if (zoom == null) return;
+
+    // Zoom is a scale, so move towards it by a share of the ratio rather than
+    // the difference. This makes zooming in and out feel equally fast.
+    viewfinder.zoom *= pow(zoom / viewfinder.zoom, lerpFactor).toDouble();
   }
 
   /// The share of the remaining distance to cover in a frame of [dt] seconds.

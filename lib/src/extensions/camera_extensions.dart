@@ -6,6 +6,8 @@ import 'package:flame/effects.dart';
 
 import '../behaviors/chase_behavior.dart';
 import '../behaviors/dead_zone.dart';
+import '../behaviors/target_group.dart';
+import '../behaviors/zoom_to_fit.dart';
 import '../effects/shake_effect.dart';
 
 /// Components added by [FlameCameraTools] that are not mounted yet, with the
@@ -36,13 +38,19 @@ final _pending = Expando<Map<Component, Completer<void>>>();
 extension FlameCameraTools on CameraComponent {
   /// Smoothly follows a target [ReadOnlyPositionProvider] using [ChaseBehavior].
   ///
+  /// To follow several targets, pass a [TargetGroup]. The camera then follows
+  /// the center of the group.
+  ///
   /// - [stiffness]: How quickly the camera follows the target (0.0–1.0). See
   ///   [ChaseBehavior.stiffness] for the scale.
   /// - [deadZone]: Optional dead zone to prevent camera movements within a defined area.
   /// - [offset]: Optional positional offset applied to the target.
   /// - [horizontalOnly]: If true, only follows in the horizontal direction.
   /// - [verticalOnly]: If true, only follows in the vertical direction.
-  /// - [snap]: If true, immediately moves the camera to the target's position plus [offset].
+  /// - [zoomToFit]: Only for a [TargetGroup]. Also zooms so that the whole
+  ///   group stays in view, and cancels running zoom effects.
+  /// - [snap]: If true, immediately moves the camera to the target's position
+  ///   plus [offset], and with [zoomToFit] also sets the zoom.
   ///
   /// Returns the [ChaseBehavior] instance, allowing later adjustments to its settings.
   ChaseBehavior chase(
@@ -52,9 +60,11 @@ extension FlameCameraTools on CameraComponent {
     Vector2? offset,
     bool horizontalOnly = false,
     bool verticalOnly = false,
+    ZoomToFit? zoomToFit,
     bool snap = false,
   }) {
     _stop();
+    if (zoomToFit != null) _removeEffects<ScaleEffect>();
 
     final chaseBehavior = ChaseBehavior(
       target: target,
@@ -63,12 +73,22 @@ extension FlameCameraTools on CameraComponent {
       offset: offset,
       horizontalOnly: horizontalOnly,
       verticalOnly: verticalOnly,
+      zoomToFit: zoomToFit,
     );
 
     _add(chaseBehavior);
 
-    if (snap) {
+    if (snap && !(target is TargetGroup && target.isEmpty)) {
       viewfinder.position = target.position + chaseBehavior.offset;
+
+      final zoom = target is TargetGroup
+          ? zoomToFit?.zoomFor(
+              target,
+              viewfinder.position,
+              viewport.virtualSize,
+            )
+          : null;
+      if (zoom != null) viewfinder.zoom = zoom;
     }
 
     return chaseBehavior;

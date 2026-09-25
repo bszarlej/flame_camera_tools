@@ -13,6 +13,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 ## Features
 
 * **Smooth Follow:** The camera can smoothly follow any target with adjustable stiffness. Supports configurable dead zones and offsets.
+* **Group Follow:** Follow several targets at once, zooming out as they spread apart so that all of them stay in view.
 * **Shake Effect:** Apply a randomized shake effect to the camera or any `PositionProvider`. The shake works on top of following, so the camera keeps tracking its target while it shakes.
 * **Zooming:** Zoom in and out, either relative to the current zoom or to an absolute zoom level.
 * **Rotating:** Rotate the camera by a specified angle or to an absolute angle.
@@ -22,7 +23,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 * **Simultaneous Effects:** Apply multiple effects at once for dynamic interactions.
 * **Not Only for Cameras:** The shake effect and the follow behavior can be added to any component.
 
-See [`example/main.dart`](example/main.dart) for a runnable demo: move with WASD and press Space to shake the camera.
+See [`example/main.dart`](example/main.dart) for a runnable demo: move with WASD and press Space to shake the camera. [`example/group_chase.dart`](example/group_chase.dart) shows the camera following a group of wandering bots.
 
 
 ## Usage
@@ -49,15 +50,15 @@ Starting an effect replaces a running effect of the same kind, so a new zoom rep
 
 ![Camera following a player that moves freely inside a dead zone](assets/dead_zone.gif)
 
-Use `chase()` to make the camera follow a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns a `ChaseBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
+Use `chase()` to make the camera chase a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns a `ChaseBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
 
 ```dart
-final follow = camera.chase(component, stiffness: 0.5);
+final chase = camera.chase(component, stiffness: 0.5);
 
 // Later, you can adjust settings
-follow.offset = Vector2(0, -50);
-follow.deadZone = CircularDeadZone(radius: 80);
-follow.stiffness = 0.7;
+chase.offset = Vector2(0, -50);
+chase.deadZone = CircularDeadZone(radius: 80);
+chase.stiffness = 0.7;
 ```
 
 `CameraComponent.chase` parameters:
@@ -84,6 +85,35 @@ To stop following, call Flame's `stop()`:
 ```dart
 camera.stop();
 ```
+
+#### Following Several Targets
+
+To keep several targets in view, for example in local multiplayer, chase a `TargetGroup`. The camera follows the center of the group, and with `zoomToFit` it also zooms out as the targets spread apart:
+
+```dart
+final players = TargetGroup([player1, player2]);
+
+camera.chase(
+  players,
+  stiffness: 0.5,
+  zoomToFit: const ZoomToFit(
+    padding: 100, // space to keep around the outermost targets
+    minZoom: 0.5, // never zoom out further than this
+    maxZoom: 1, // never zoom in further than this
+  ),
+);
+
+// Players can join and leave at any time
+players.add(player3);
+players.remove(player1);
+```
+
+* `padding`: Extra space in world units between the outermost targets and the edge of the screen. Components are always kept fully in view, whatever their size and anchor, so padding is only needed for breathing room.
+* `minZoom` / `maxZoom`: Limits for the zoom. With the default `maxZoom` of `1`, the camera keeps its normal zoom while the targets are close together and only zooms out when they spread apart. The default `minZoom` of `0` never stops zooming out.
+
+`deadZone`, `offset` and the axis locks work with groups too. A small dead zone keeps the camera calm while single targets move around. The fit is measured from where the camera actually is, so the targets stay in view even when an offset or dead zone keeps the camera away from the center of the group, or while it catches up with a fast group.
+
+The zoom follows with the same `stiffness` as the movement, and `snap` sets it right away. Chasing with `zoomToFit` cancels running zoom effects, and zooming with `zoomTo()` or `zoomBy()` while it runs makes them fight over the zoom. While the group is empty, the camera stays where it is.
 
 #### Custom Dead Zones
 

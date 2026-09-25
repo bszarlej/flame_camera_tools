@@ -220,6 +220,82 @@ void main() {
     });
   });
 
+  group('chase with a TargetGroup', () {
+    TargetGroup spread() => TargetGroup([
+          PositionComponent(),
+          PositionComponent(position: Vector2(1600, 0)),
+        ]);
+
+    testWithFlameGame('snap moves and zooms straight to the group',
+        (game) async {
+      final camera = game.camera;
+      camera.chase(
+        spread(),
+        stiffness: 0,
+        offset: Vector2(0, -30),
+        zoomToFit: const ZoomToFit(),
+        snap: true,
+      );
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(800, -30)));
+      expect(camera.viewfinder.zoom, closeTo(0.5, 1e-4));
+    });
+
+    testWithFlameGame('snap without zoomToFit keeps the zoom', (game) async {
+      final camera = game.camera;
+      camera.chase(spread(), stiffness: 0, snap: true);
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(800, 0)));
+      expect(camera.viewfinder.zoom, closeTo(1, 1e-4));
+    });
+
+    testWithFlameGame('snap to an empty group does not move', (game) async {
+      final camera = game.camera;
+      camera.viewfinder.position = Vector2(100, 100);
+      camera.chase(TargetGroup(), zoomToFit: const ZoomToFit(), snap: true);
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(100, 100)));
+    });
+
+    testWithFlameGame('zoomToFit cancels running zoom effects', (game) async {
+      final camera = game.camera;
+      final done = track(camera.zoomTo(3, EffectController(duration: 1)));
+      await tick(game, 0.1);
+
+      camera.chase(spread(), zoomToFit: const ZoomToFit());
+      await tick(game, 0.1);
+
+      expect(done(), isTrue);
+      expect(camera.viewfinder.children.whereType<ScaleEffect>(), isEmpty);
+    });
+
+    testWithFlameGame('without zoomToFit, keeps running zoom effects',
+        (game) async {
+      final camera = game.camera;
+      final done = track(camera.zoomTo(3, EffectController(duration: 1)));
+      await tick(game, 0.1);
+
+      camera.chase(spread());
+      await tick(game, 0.1);
+
+      expect(done(), isFalse);
+    });
+
+    testWithFlameGame('stops with camera.stop()', (game) async {
+      final camera = game.camera;
+      camera.chase(spread(), zoomToFit: const ZoomToFit());
+      await tick(game, 0.1);
+
+      camera.stop();
+      await tick(game, 0.1);
+      final zoom = camera.viewfinder.zoom;
+      await tick(game, 0.1);
+
+      expect(camera.viewfinder.children.whereType<FollowBehavior>(), isEmpty);
+      expect(camera.viewfinder.zoom, zoom);
+    });
+  });
+
   group('effectSequence', () {
     testWithFlameGame('runs each effect after the previous one', (game) async {
       final camera = game.camera;
