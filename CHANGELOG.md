@@ -1,12 +1,32 @@
-## 5.2.0
+## 6.0.0
+
+### Breaking changes
+
+* `rotateBy` now takes radians instead of degrees, like the rest of Flame. Wrap degree values in `radians()`, for example `camera.rotateBy(radians(45), ...)`. Code using degrees still compiles, but rotates about 57 times as far.
+* `stiffness` is now spread evenly over its range. Before, all useful values were between `0.9` and `1`. Now `0.5` closes half the distance to the target in 0.2 seconds, and each step of `0.1` makes the camera noticeably faster or slower. `0` still never moves and `1` still follows instantly. To keep the previous feel, convert your values:
+
+  | Before | After |
+  |--------|-------|
+  | 0.5    | 0.17  |
+  | 0.9    | 0.4   |
+  | 0.95   | 0.46  |
+  | 0.97   | 0.5   |
+  | 0.99   | 0.57  |
+  | 0.999  | 0.67  |
+
+* Renamed `AdvancedFollowBehavior` to `ChaseBehavior`, matching `camera.chase()`.
+* Removed the deprecated `Deadzone`, `CircularDeadzone` and `RectangularDeadzone`. Use `DeadZone`, `CircularDeadZone` and `RectangularDeadZone` instead.
+* `DeadZone` is now an `interface class`, so custom dead zones have to `implement` it instead of `extend` it.
 
 ### Features
 
-* Added `camera.rotateTo` to rotate the camera to an absolute angle in degrees.
+* Added `camera.rotateTo` to rotate the camera to an absolute angle.
+* The camera can now chase several targets at once. Pass a `TargetGroup` to `chase()` to follow the center of the group, and `zoomToFit: ZoomToFit(...)` to also zoom out as the targets spread apart, so that all of them stay in view. Targets can be added to and removed from the group at any time.
 
-### Deprecations
+### Other
 
-* Renamed `AdvancedFollowBehavior` to `ChaseBehavior`, matching `camera.chase()`. The old name still works, but is deprecated and will be removed in 6.0.0.
+* Added `example/group_chase.dart`, where the camera follows a group of wandering bots.
+* The README gifs are no longer part of the published package, which makes it much smaller to download.
 
 ## 5.1.0
 
