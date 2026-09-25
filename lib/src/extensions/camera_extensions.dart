@@ -29,14 +29,15 @@ final _pending = Expando<Map<Component, Completer<void>>>();
 /// finishes or is cancelled, so effects can be awaited or chained:
 ///
 /// ```dart
-/// camera.chase(player, stiffness: 0.9);
+/// camera.chase(player, stiffness: 0.5);
 /// await camera.zoomTo(1.5, EffectController(duration: 1));
 /// await camera.shake(10, EffectController(duration: 0.5));
 /// ```
 extension FlameCameraTools on CameraComponent {
   /// Smoothly follows a target [ReadOnlyPositionProvider] using [ChaseBehavior].
   ///
-  /// - [stiffness]: How quickly the camera follows the target (0.0–1.0).
+  /// - [stiffness]: How quickly the camera follows the target (0.0–1.0). See
+  ///   [ChaseBehavior.stiffness] for the scale.
   /// - [deadZone]: Optional dead zone to prevent camera movements within a defined area.
   /// - [offset]: Optional positional offset applied to the target.
   /// - [horizontalOnly]: If true, only follows in the horizontal direction.

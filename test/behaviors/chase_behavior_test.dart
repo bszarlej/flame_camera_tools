@@ -69,24 +69,51 @@ void main() {
       final target = PositionComponent(position: Vector2(100, 0));
       final at60fps = await addFollower(
         game,
-        ChaseBehavior(target: target, stiffness: 0.9),
+        ChaseBehavior(target: target, stiffness: 0.5),
       );
       final at10fps = await addFollower(
         game,
-        ChaseBehavior(target: target, stiffness: 0.9),
+        ChaseBehavior(target: target, stiffness: 0.5),
       );
 
-      // Both followers get one second in total, split into different steps.
-      for (var i = 0; i < 60; i++) {
+      // Both followers get 0.2 seconds in total, split into different steps.
+      for (var i = 0; i < 12; i++) {
         at60fps.children.first.update(1 / 60);
       }
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < 2; i++) {
         at10fps.children.first.update(1 / 10);
       }
 
-      // A stiffness of 0.9 closes 90% of the distance per second.
-      expect(at60fps.position, closeToVector(Vector2(90, 0), epsilon));
-      expect(at10fps.position, closeToVector(Vector2(90, 0), epsilon));
+      // A stiffness of 0.5 closes half the distance in 0.2 seconds.
+      expect(at60fps.position, closeToVector(Vector2(50, 0), epsilon));
+      expect(at10fps.position, closeToVector(Vector2(50, 0), epsilon));
+    });
+
+    testWithFlameGame('closes half the distance in the documented times',
+        (game) async {
+      final halfLives = {
+        0.1: 1.8,
+        0.3: 0.2 * 7 / 3,
+        0.7: 0.2 * 3 / 7,
+        0.9: 0.2 / 9
+      };
+
+      for (final MapEntry(key: stiffness, value: halfLife)
+          in halfLives.entries) {
+        final target = PositionComponent(position: Vector2(100, 0));
+        final owner = await addFollower(
+          game,
+          ChaseBehavior(target: target, stiffness: stiffness),
+        );
+
+        owner.children.first.update(halfLife);
+
+        expect(
+          owner.position,
+          closeToVector(Vector2(50, 0), epsilon),
+          reason: 'stiffness $stiffness',
+        );
+      }
     });
 
     testWithFlameGame('follows the target plus the offset', (game) async {

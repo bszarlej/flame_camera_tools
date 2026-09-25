@@ -52,12 +52,12 @@ Starting an effect replaces a running effect of the same kind, so a new zoom rep
 Use `chase()` to make the camera follow a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns a `ChaseBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
 
 ```dart
-final follow = camera.chase(component, stiffness: 0.95);
+final follow = camera.chase(component, stiffness: 0.5);
 
 // Later, you can adjust settings
 follow.offset = Vector2(0, -50);
 follow.deadZone = CircularDeadZone(radius: 80);
-follow.stiffness = 0.9;
+follow.stiffness = 0.7;
 ```
 
 `CameraComponent.chase` parameters:
@@ -65,7 +65,7 @@ follow.stiffness = 0.9;
 ```dart
 camera.chase(
   component,
-  stiffness: 0.95,
+  stiffness: 0.5,
   deadZone: RectangularDeadZone.all(100),
   offset: Vector2(0, -50),
   horizontalOnly: false,
@@ -74,7 +74,7 @@ camera.chase(
 );
 ```
 
-* `stiffness`: How quickly the camera catches up, from `0.0` (never moves) to `1.0` (follows instantly). It behaves the same at any frame rate.
+* `stiffness`: How quickly the camera catches up, from `0.0` (never moves) to `1.0` (follows instantly). At `0.5` it closes half the distance to the target in 0.2 seconds; lower values are floatier, higher values tighter. It behaves the same at any frame rate.
 * `deadZone`: An area around the camera in which the target can move without the camera following. Use `CircularDeadZone`, `RectangularDeadZone` or your own `DeadZone` implementation.
 * `offset`: Follows a point offset from the target, for example to look ahead of a moving player.
 * `horizontalOnly` / `verticalOnly`: Only follow along one axis.
@@ -223,7 +223,7 @@ enemy.add(ShakeEffect(5, EffectController(duration: 0.3)));
 pet.add(
   ChaseBehavior(
     target: player,
-    stiffness: 0.9,
+    stiffness: 0.4,
     offset: Vector2(-40, 0),
   ),
 );

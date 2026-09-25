@@ -20,7 +20,7 @@ import 'dead_zone.dart';
 /// pet.add(
 ///   ChaseBehavior(
 ///     target: player,
-///     stiffness: 0.8,
+///     stiffness: 0.4,
 ///     deadZone: CircularDeadZone(radius: 50),
 ///     offset: Vector2(-40, 0),
 ///   ),
@@ -49,7 +49,7 @@ class ChaseBehavior extends FollowBehavior {
 
   /// Creates a [ChaseBehavior].
   ///
-  /// - [stiffness]: Controls how quickly the follower moves towards the target. Clamped between 0.0 and 1.0.
+  /// - [stiffness]: Controls how quickly the follower moves towards the target. Clamped between 0.0 and 1.0; see [stiffness] for the scale.
   /// - [deadZone]: Optional dead zone area; defaults to a [CircularDeadZone] with a radius of 0.
   /// - [offset]: Optional offset applied to the target's position.
   /// - [target]: The [ReadOnlyPositionProvider] to follow, such as a component.
@@ -97,7 +97,21 @@ class ChaseBehavior extends FollowBehavior {
     _verticalOnly = value;
   }
 
-  /// How quickly the follower moves towards the target.
+  /// How quickly the follower moves towards the target, from `0.0` (never
+  /// moves) to `1.0` (follows instantly).
+  ///
+  /// The follower closes half of the remaining distance in a fixed time,
+  /// which gets shorter the higher the stiffness:
+  ///
+  /// | stiffness | time to close half the distance |
+  /// |-----------|---------------------------------|
+  /// | 0.1       | 1.8 s                           |
+  /// | 0.3       | 0.47 s                          |
+  /// | 0.5       | 0.2 s                           |
+  /// | 0.7       | 0.086 s                         |
+  /// | 0.9       | 0.022 s                         |
+  ///
+  /// This behaves the same at any frame rate.
   double get stiffness => _stiffness;
   set stiffness(double value) {
     _stiffness = value.clamp(0.0, 1.0);
@@ -121,7 +135,7 @@ class ChaseBehavior extends FollowBehavior {
     if (_horizontalOnly) _tempDelta.y = 0;
     if (_verticalOnly) _tempDelta.x = 0;
 
-    final lerpFactor = 1 - pow(1 - stiffness, dt);
+    final lerpFactor = _lerpFactor(dt);
     final distance = _tempDelta.length;
     final deltaOffset = distance * lerpFactor;
 
@@ -129,5 +143,17 @@ class ChaseBehavior extends FollowBehavior {
       _tempDelta.scale(deltaOffset / distance);
     }
     if (!_tempDelta.isZero()) owner.position += _tempDelta;
+  }
+
+  /// The share of the remaining distance to cover in a frame of [dt] seconds.
+  double _lerpFactor(double dt) {
+    if (_stiffness >= 1) return 1;
+    if (_stiffness <= 0) return 0;
+
+    // The time in seconds to close half the remaining distance. Scaling it
+    // by (1 - stiffness) / stiffness spreads the useful speeds evenly over
+    // the range, instead of squeezing them all close to 1.
+    final halfLife = 0.2 * (1 - _stiffness) / _stiffness;
+    return 1 - pow(0.5, dt / halfLife).toDouble();
   }
 }
