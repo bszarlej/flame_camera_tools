@@ -114,32 +114,34 @@ extension FlameCameraTools on CameraComponent {
     return _add(ScaleEffect.to(Vector2.all(value), controller));
   }
 
-  /// Rotates the camera by a relative [angle] in degrees.
+  /// Rotates the camera by a relative [angle] in radians.
   ///
-  /// - [angle]: Amount to rotate the camera by in degrees.
+  /// - [angle]: Amount to rotate the camera by in radians. To use degrees,
+  ///   convert them with `radians()`, for example `radians(45)`.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
   ///
   /// Returns a [Future] that completes when the rotation finishes or is cancelled.
   Future<void> rotateBy(double angle, EffectController controller) {
     _removeEffects<RotateEffect>();
 
-    return _add(RotateEffect.by(radians(angle), controller));
+    return _add(RotateEffect.by(angle, controller));
   }
 
-  /// Rotates the camera to an absolute [angle] in degrees.
+  /// Rotates the camera to an absolute [angle] in radians.
   ///
-  /// - [angle]: The angle to rotate the camera to in degrees.
+  /// - [angle]: The angle to rotate the camera to in radians. To use degrees,
+  ///   convert them with `radians()`, for example `radians(45)`.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
   ///
   /// The camera rotates by the difference between [angle] and its current
   /// angle, without taking the shortest way round. For example, rotating
-  /// from `350` to `0` turns back 350 degrees rather than forward 10.
+  /// from `radians(350)` to `0` turns back 350 degrees rather than forward 10.
   ///
   /// Returns a [Future] that completes when the rotation finishes or is cancelled.
   Future<void> rotateTo(double angle, EffectController controller) {
     _removeEffects<RotateEffect>();
 
-    return _add(RotateEffect.to(radians(angle), controller));
+    return _add(RotateEffect.to(angle, controller));
   }
 
   /// Moves the camera directly to a [targetPosition].
@@ -164,7 +166,7 @@ extension FlameCameraTools on CameraComponent {
   /// await camera.effectSequence([
   ///   () => camera.shake(20.0, LinearEffectController(0.5)),
   ///   () => camera.zoomTo(2.0, LinearEffectController(0.5)),
-  ///   () => camera.rotateBy(45, LinearEffectController(0.5)),
+  ///   () => camera.rotateBy(pi / 4, LinearEffectController(0.5)),
   /// ]);
   /// ```
   Future<void> effectSequence(List<Future<void> Function()> effects) async {

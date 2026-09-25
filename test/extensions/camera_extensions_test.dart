@@ -29,9 +29,9 @@ void main() {
       'zoomBy': (camera) => camera.zoomBy(0.5, EffectController(duration: 1)),
       'zoomTo': (camera) => camera.zoomTo(2, EffectController(duration: 1)),
       'rotateBy': (camera) =>
-          camera.rotateBy(45, EffectController(duration: 1)),
+          camera.rotateBy(pi / 4, EffectController(duration: 1)),
       'rotateTo': (camera) =>
-          camera.rotateTo(45, EffectController(duration: 1)),
+          camera.rotateTo(pi / 4, EffectController(duration: 1)),
       'lookAt': (camera) =>
           camera.lookAt(Vector2(100, 100), EffectController(duration: 1)),
     };
@@ -123,9 +123,9 @@ void main() {
   });
 
   group('rotateBy', () {
-    testWithFlameGame('takes the angle in degrees', (game) async {
+    testWithFlameGame('takes the angle in radians', (game) async {
       final camera = game.camera;
-      camera.rotateBy(90, EffectController(duration: 1));
+      camera.rotateBy(pi / 2, EffectController(duration: 1));
       await tick(game, 1.1);
 
       expect(camera.viewfinder.angle, closeTo(pi / 2, 1e-4));
@@ -133,12 +133,12 @@ void main() {
   });
 
   group('rotateTo', () {
-    testWithFlameGame('ends at the given angle in degrees', (game) async {
+    testWithFlameGame('ends at the given angle in radians', (game) async {
       final camera = game.camera;
-      camera.rotateBy(30, EffectController(duration: 0.1));
+      camera.rotateBy(radians(30), EffectController(duration: 0.1));
       await tick(game, 0.2);
 
-      camera.rotateTo(90, EffectController(duration: 1));
+      camera.rotateTo(pi / 2, EffectController(duration: 1));
       await tick(game, 1.1);
 
       expect(camera.viewfinder.angle, closeTo(pi / 2, 1e-4));
@@ -146,7 +146,7 @@ void main() {
 
     testWithFlameGame('replaces a running rotateBy', (game) async {
       final camera = game.camera;
-      camera.rotateBy(90, EffectController(duration: 10));
+      camera.rotateBy(pi / 2, EffectController(duration: 10));
       await tick(game, 1);
 
       camera.rotateTo(0, EffectController(duration: 1));
@@ -158,7 +158,7 @@ void main() {
 
     testWithFlameGame('does not take the shortest way round', (game) async {
       final camera = game.camera;
-      camera.rotateBy(350, EffectController(duration: 0.1));
+      camera.rotateBy(radians(350), EffectController(duration: 0.1));
       await tick(game, 0.2);
 
       camera.rotateTo(0, EffectController(duration: 1));
@@ -232,7 +232,7 @@ void main() {
           },
           () {
             started.add('rotate');
-            return camera.rotateBy(45, EffectController(duration: 1));
+            return camera.rotateBy(pi / 4, EffectController(duration: 1));
           },
         ]),
       );
@@ -256,7 +256,7 @@ void main() {
           () => camera.zoomTo(2, EffectController(duration: 10)),
           () {
             rotateStarted = true;
-            return camera.rotateBy(45, EffectController(duration: 1));
+            return camera.rotateBy(pi / 4, EffectController(duration: 1));
           },
         ]),
       );

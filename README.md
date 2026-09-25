@@ -154,7 +154,7 @@ await camera.zoomTo(2.0, LinearEffectController(1.0));
 Rotate the camera by a relative angle:
 
 ```dart
-await camera.rotateBy(45, LinearEffectController(1.0)); // rotate 45 degrees
+await camera.rotateBy(pi / 4, LinearEffectController(1.0)); // rotate 45 degrees
 ```
 
 Or rotate to an absolute angle:
@@ -163,12 +163,10 @@ Or rotate to an absolute angle:
 await camera.rotateTo(0, LinearEffectController(1.0)); // back to upright
 ```
 
-* `angle`: Relative rotation or absolute angle in degrees.
+* `angle`: Relative rotation or absolute angle in radians, like everywhere else in Flame. To use degrees, convert them with `radians()`, for example `radians(45)`.
 * `controller`: Controls duration, curve, and smoothing.
 
-`rotateTo` rotates by the difference to the current angle, without taking the shortest way round: from `350` to `0` it turns back 350 degrees rather than forward 10.
-
-> **Note:** Unlike most of Flame, which uses radians, `rotateBy` and `rotateTo` take degrees. Pass `45` rather than `pi / 4`.
+`rotateTo` rotates by the difference to the current angle, without taking the shortest way round: from `radians(350)` to `0` it turns back 350 degrees rather than forward 10.
 
 ---
 
@@ -192,7 +190,7 @@ Chain multiple effects in sequence:
 await camera.effectSequence([
   () => camera.shake(10.0, LinearEffectController(0.5)),
   () => camera.zoomTo(1.5, LinearEffectController(1.0)),
-  () => camera.rotateBy(45, LinearEffectController(0.5)),
+  () => camera.rotateBy(pi / 4, LinearEffectController(0.5)),
 ]);
 ```
 
@@ -208,7 +206,7 @@ You can apply multiple effects at the same time:
 camera
   ..shake(7.0, LinearEffectController(4))
   ..zoomTo(0.75, LinearEffectController(1.0))
-  ..rotateBy(45, LinearEffectController(1.0));
+  ..rotateBy(pi / 4, LinearEffectController(1.0));
 ```
 
 ---
