@@ -1,6 +1,3 @@
-// The deprecated Deadzone aliases are exercised on purpose.
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flame/components.dart';
 import 'package:flame_camera_tools/flame_camera_tools.dart';
 import 'package:flame_test/flame_test.dart';
@@ -214,26 +211,6 @@ void main() {
 
     test('asserts that the radius is non-negative', () {
       expect(() => CircularDeadZone(radius: -1), throwsAssertionError);
-    });
-  });
-
-  group('deprecated Deadzone aliases', () {
-    test('still construct the renamed classes', () {
-      expect(RectangularDeadzone(left: 10), isA<RectangularDeadZone>());
-      expect(RectangularDeadzone.all(10), isA<RectangularDeadZone>());
-      expect(
-        RectangularDeadzone.symmetric(horizontal: 10),
-        isA<RectangularDeadZone>(),
-      );
-      expect(CircularDeadzone(radius: 10), isA<CircularDeadZone>());
-    });
-
-    test('are interchangeable with the new types', () {
-      final Deadzone deadZone = CircularDeadzone(radius: 10);
-      final DeadZone renamed = deadZone;
-
-      expect(renamed, isA<CircularDeadZone>());
-      expect(RectangularDeadZone.all(10), isA<Deadzone>());
     });
   });
 }
