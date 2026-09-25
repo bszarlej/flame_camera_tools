@@ -10,7 +10,7 @@ const epsilon = 1e-4;
 /// Adds a component at the origin to [game] that is driven by [behavior].
 Future<PositionComponent> addFollower(
   FlameGame game,
-  AdvancedFollowBehavior behavior,
+  ChaseBehavior behavior,
 ) async {
   final owner = PositionComponent()..add(behavior);
   await game.ensureAdd(owner);
@@ -18,13 +18,13 @@ Future<PositionComponent> addFollower(
 }
 
 void main() {
-  group('AdvancedFollowBehavior', () {
+  group('ChaseBehavior', () {
     testWithFlameGame('with stiffness 1, reaches the target in one update',
         (game) async {
       final target = PositionComponent(position: Vector2(100, 50));
       final owner = await addFollower(
         game,
-        AdvancedFollowBehavior(target: target),
+        ChaseBehavior(target: target),
       );
 
       game.update(1 / 60);
@@ -36,7 +36,7 @@ void main() {
       final target = PositionComponent(position: Vector2(100, 50));
       final owner = await addFollower(
         game,
-        AdvancedFollowBehavior(target: target, stiffness: 0),
+        ChaseBehavior(target: target, stiffness: 0),
       );
 
       for (var i = 0; i < 60; i++) {
@@ -50,15 +50,15 @@ void main() {
       final target = PositionComponent();
 
       expect(
-        AdvancedFollowBehavior(target: target, stiffness: 1.5).stiffness,
+        ChaseBehavior(target: target, stiffness: 1.5).stiffness,
         1,
       );
       expect(
-        AdvancedFollowBehavior(target: target, stiffness: -0.5).stiffness,
+        ChaseBehavior(target: target, stiffness: -0.5).stiffness,
         0,
       );
 
-      final behavior = AdvancedFollowBehavior(target: target)..stiffness = 2;
+      final behavior = ChaseBehavior(target: target)..stiffness = 2;
       expect(behavior.stiffness, 1);
       behavior.stiffness = -1;
       expect(behavior.stiffness, 0);
@@ -69,11 +69,11 @@ void main() {
       final target = PositionComponent(position: Vector2(100, 0));
       final at60fps = await addFollower(
         game,
-        AdvancedFollowBehavior(target: target, stiffness: 0.9),
+        ChaseBehavior(target: target, stiffness: 0.9),
       );
       final at10fps = await addFollower(
         game,
-        AdvancedFollowBehavior(target: target, stiffness: 0.9),
+        ChaseBehavior(target: target, stiffness: 0.9),
       );
 
       // Both followers get one second in total, split into different steps.
@@ -93,7 +93,7 @@ void main() {
       final target = PositionComponent(position: Vector2(100, 50));
       final owner = await addFollower(
         game,
-        AdvancedFollowBehavior(target: target, offset: Vector2(0, -30)),
+        ChaseBehavior(target: target, offset: Vector2(0, -30)),
       );
 
       game.update(1 / 60);
@@ -103,7 +103,7 @@ void main() {
 
     testWithFlameGame('picks up offset changes', (game) async {
       final target = PositionComponent(position: Vector2(100, 50));
-      final behavior = AdvancedFollowBehavior(target: target);
+      final behavior = ChaseBehavior(target: target);
       final owner = await addFollower(game, behavior);
 
       behavior.offset = Vector2(10, 0);
@@ -117,7 +117,7 @@ void main() {
       final target = PositionComponent(position: Vector2(30, -40));
       final owner = await addFollower(
         game,
-        AdvancedFollowBehavior(
+        ChaseBehavior(
           target: target,
           deadZone: RectangularDeadZone.all(50),
         ),
@@ -130,7 +130,7 @@ void main() {
 
     testWithFlameGame('picks up dead zone changes', (game) async {
       final target = PositionComponent(position: Vector2(30, -40));
-      final behavior = AdvancedFollowBehavior(target: target);
+      final behavior = ChaseBehavior(target: target);
       final owner = await addFollower(game, behavior);
 
       behavior.deadZone = CircularDeadZone(radius: 100);
@@ -140,12 +140,12 @@ void main() {
     });
   });
 
-  group('AdvancedFollowBehavior axis locks', () {
+  group('ChaseBehavior axis locks', () {
     testWithFlameGame('horizontalOnly only moves horizontally', (game) async {
       final target = PositionComponent(position: Vector2(100, 50));
       final owner = await addFollower(
         game,
-        AdvancedFollowBehavior(target: target, horizontalOnly: true),
+        ChaseBehavior(target: target, horizontalOnly: true),
       );
 
       game.update(1 / 60);
@@ -157,7 +157,7 @@ void main() {
       final target = PositionComponent(position: Vector2(100, 50));
       final owner = await addFollower(
         game,
-        AdvancedFollowBehavior(target: target, verticalOnly: true),
+        ChaseBehavior(target: target, verticalOnly: true),
       );
 
       game.update(1 / 60);
@@ -169,7 +169,7 @@ void main() {
       final target = PositionComponent();
 
       expect(
-        () => AdvancedFollowBehavior(
+        () => ChaseBehavior(
           target: target,
           horizontalOnly: true,
           verticalOnly: true,
@@ -177,12 +177,12 @@ void main() {
         throwsAssertionError,
       );
       expect(
-        () => AdvancedFollowBehavior(target: target, horizontalOnly: true)
+        () => ChaseBehavior(target: target, horizontalOnly: true)
           ..verticalOnly = true,
         throwsAssertionError,
       );
       expect(
-        () => AdvancedFollowBehavior(target: target, verticalOnly: true)
+        () => ChaseBehavior(target: target, verticalOnly: true)
           ..horizontalOnly = true,
         throwsAssertionError,
       );
@@ -190,7 +190,7 @@ void main() {
 
     testWithFlameGame('can switch axes at runtime', (game) async {
       final target = PositionComponent(position: Vector2(100, 50));
-      final behavior = AdvancedFollowBehavior(
+      final behavior = ChaseBehavior(
         target: target,
         horizontalOnly: true,
       );
@@ -210,7 +210,7 @@ void main() {
       final owner = PositionComponent();
       final target = PositionComponent(position: Vector2(10, 100));
       owner.add(
-        AdvancedFollowBehavior(
+        ChaseBehavior(
           target: target,
           deadZone: CircularDeadZone(radius: 50),
           horizontalOnly: true,
@@ -229,7 +229,7 @@ void main() {
       final owner = PositionComponent();
       final target = PositionComponent(position: Vector2(100, 10));
       owner.add(
-        AdvancedFollowBehavior(
+        ChaseBehavior(
           target: target,
           deadZone: CircularDeadZone(radius: 50),
           verticalOnly: true,
@@ -248,7 +248,7 @@ void main() {
       final owner = PositionComponent();
       final target = PositionComponent(position: Vector2(80, 100));
       owner.add(
-        AdvancedFollowBehavior(
+        ChaseBehavior(
           target: target,
           deadZone: CircularDeadZone(radius: 50),
           horizontalOnly: true,
@@ -267,7 +267,7 @@ void main() {
       final owner = PositionComponent();
       final target = PositionComponent(position: Vector2(100, 80));
       owner.add(
-        AdvancedFollowBehavior(
+        ChaseBehavior(
           target: target,
           deadZone: CircularDeadZone(radius: 50),
           verticalOnly: true,

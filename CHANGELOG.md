@@ -4,6 +4,10 @@
 
 * Added `camera.rotateTo` to rotate the camera to an absolute angle in degrees.
 
+### Deprecations
+
+* Renamed `AdvancedFollowBehavior` to `ChaseBehavior`, matching `camera.chase()`. The old name still works, but is deprecated and will be removed in 6.0.0.
+
 ## 5.1.0
 
 ### Behavior changes

@@ -49,7 +49,7 @@ Starting an effect replaces a running effect of the same kind, so a new zoom rep
 
 ![Camera following a player that moves freely inside a dead zone](assets/dead_zone.gif)
 
-Use `chase()` to make the camera follow a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns an `AdvancedFollowBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
+Use `chase()` to make the camera follow a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns a `ChaseBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
 
 ```dart
 final follow = camera.chase(component, stiffness: 0.95);
@@ -213,7 +213,7 @@ camera
 
 ### Using It Without a Camera
 
-`ShakeEffect` and `AdvancedFollowBehavior` work on any component, not just the camera:
+`ShakeEffect` and `ChaseBehavior` work on any component, not just the camera:
 
 ```dart
 // Shake an enemy that got hit
@@ -221,7 +221,7 @@ enemy.add(ShakeEffect(5, EffectController(duration: 0.3)));
 
 // Make a pet follow the player
 pet.add(
-  AdvancedFollowBehavior(
+  ChaseBehavior(
     target: player,
     stiffness: 0.9,
     offset: Vector2(-40, 0),
