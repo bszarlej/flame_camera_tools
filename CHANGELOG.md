@@ -1,3 +1,9 @@
+## 5.2.0
+
+### Features
+
+* Added `camera.rotateTo` to rotate the camera to an absolute angle in degrees.
+
 ## 5.1.0
 
 ### Behavior changes

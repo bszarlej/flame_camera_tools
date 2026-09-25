@@ -18,7 +18,8 @@ final _pending = Expando<Map<Component, Completer<void>>>();
 /// Camera helpers for Flame's [CameraComponent].
 ///
 /// Adds smooth following with [chase], camera effects with [shake], [zoomBy],
-/// [zoomTo], [rotateBy] and [lookAt], and chaining with [effectSequence].
+/// [zoomTo], [rotateBy], [rotateTo] and [lookAt], and chaining with
+/// [effectSequence].
 ///
 /// Starting an effect replaces a running effect of the same kind: a new zoom
 /// replaces the current zoom, a new shake the current shake, and so on.
@@ -123,6 +124,22 @@ extension FlameCameraTools on CameraComponent {
     _removeEffects<RotateEffect>();
 
     return _add(RotateEffect.by(radians(angle), controller));
+  }
+
+  /// Rotates the camera to an absolute [angle] in degrees.
+  ///
+  /// - [angle]: The angle to rotate the camera to in degrees.
+  /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
+  ///
+  /// The camera rotates by the difference between [angle] and its current
+  /// angle, without taking the shortest way round. For example, rotating
+  /// from `350` to `0` turns back 350 degrees rather than forward 10.
+  ///
+  /// Returns a [Future] that completes when the rotation finishes or is cancelled.
+  Future<void> rotateTo(double angle, EffectController controller) {
+    _removeEffects<RotateEffect>();
+
+    return _add(RotateEffect.to(radians(angle), controller));
   }
 
   /// Moves the camera directly to a [targetPosition].
