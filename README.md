@@ -46,9 +46,13 @@ Starting an effect replaces a running effect of the same kind, so a new zoom rep
 
 ### Smoothly Follow a Component
 
-![Camera smoothly following a player](assets/chase.gif)
+**Smooth follow**
 
-![Camera following a player that moves freely inside a dead zone](assets/dead_zone.gif)
+![Camera smoothly following a player](https://raw.githubusercontent.com/bszarlej/flame_camera_tools/master/assets/chase.gif)
+
+**Dead zone**
+
+![Camera following a player that moves freely inside a dead zone](https://raw.githubusercontent.com/bszarlej/flame_camera_tools/master/assets/dead_zone.gif)
 
 Use `chase()` to make the camera chase a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns a `ChaseBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
 
@@ -87,6 +91,10 @@ camera.stop();
 ```
 
 #### Following Several Targets
+
+**Group follow with zoom to fit**
+
+![Camera zooming out and in to keep a group of wandering bots in view](https://raw.githubusercontent.com/bszarlej/flame_camera_tools/master/assets/group_chase.gif)
 
 To keep several targets in view, for example in local multiplayer, chase a `TargetGroup`. The camera follows the center of the group, and with `zoomToFit` it also zooms out as the targets spread apart:
 
