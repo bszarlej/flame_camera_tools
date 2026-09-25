@@ -4,7 +4,7 @@ import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 
-import '../behaviors/advanced_follow_behavior.dart';
+import '../behaviors/chase_behavior.dart';
 import '../behaviors/dead_zone.dart';
 import '../effects/shake_effect.dart';
 
@@ -34,7 +34,7 @@ final _pending = Expando<Map<Component, Completer<void>>>();
 /// await camera.shake(10, EffectController(duration: 0.5));
 /// ```
 extension FlameCameraTools on CameraComponent {
-  /// Smoothly follows a target [ReadOnlyPositionProvider] using [AdvancedFollowBehavior].
+  /// Smoothly follows a target [ReadOnlyPositionProvider] using [ChaseBehavior].
   ///
   /// - [stiffness]: How quickly the camera follows the target (0.0–1.0).
   /// - [deadZone]: Optional dead zone to prevent camera movements within a defined area.
@@ -43,8 +43,8 @@ extension FlameCameraTools on CameraComponent {
   /// - [verticalOnly]: If true, only follows in the vertical direction.
   /// - [snap]: If true, immediately moves the camera to the target's position plus [offset].
   ///
-  /// Returns the [AdvancedFollowBehavior] instance, allowing later adjustments to its settings.
-  AdvancedFollowBehavior chase(
+  /// Returns the [ChaseBehavior] instance, allowing later adjustments to its settings.
+  ChaseBehavior chase(
     ReadOnlyPositionProvider target, {
     double stiffness = 1.0,
     DeadZone? deadZone,
@@ -55,7 +55,7 @@ extension FlameCameraTools on CameraComponent {
   }) {
     _stop();
 
-    final advancedFollowBehavior = AdvancedFollowBehavior(
+    final chaseBehavior = ChaseBehavior(
       target: target,
       stiffness: stiffness,
       deadZone: deadZone,
@@ -64,13 +64,13 @@ extension FlameCameraTools on CameraComponent {
       verticalOnly: verticalOnly,
     );
 
-    _add(advancedFollowBehavior);
+    _add(chaseBehavior);
 
     if (snap) {
-      viewfinder.position = target.position + advancedFollowBehavior.offset;
+      viewfinder.position = target.position + chaseBehavior.offset;
     }
 
-    return advancedFollowBehavior;
+    return chaseBehavior;
   }
 
   /// Shakes the camera using a [ShakeEffect].

@@ -5,30 +5,31 @@ import 'package:flame/components.dart';
 
 import 'dead_zone.dart';
 
-/// A behavior that allows a component to follow a target smoothly with configurable constraints.
+/// A behavior that makes its parent chase a target.
 ///
-/// This behavior calculates a delta between the follower and the target, applying:
-/// - A dead zone that prevents movement until the target moves beyond a certain threshold.
-/// - Optional horizontal-only or vertical-only following.
-/// - Smooth interpolation using a configurable stiffness factor.
-/// - An optional offset to adjust the following position.
+/// Each frame the follower moves towards the target, applying:
+/// - A [deadZone] in which the target can move without the follower moving.
+/// - Smooth, frame-rate-independent catching up controlled by [stiffness].
+/// - An [offset] from the target, for example to look ahead of a player.
+/// - Optional [horizontalOnly] or [verticalOnly] following.
 ///
-/// While often used for camera components, this behavior can be applied to any [PositionComponent].
+/// This is the behavior that `camera.chase()` adds to the viewfinder, but it
+/// works on any [PositionComponent]:
+///
+/// ```dart
+/// pet.add(
+///   ChaseBehavior(
+///     target: player,
+///     stiffness: 0.8,
+///     deadZone: CircularDeadZone(radius: 50),
+///     offset: Vector2(-40, 0),
+///   ),
+/// );
+/// ```
 ///
 /// The inherited [maxSpeed] is not used; [stiffness] controls how fast the
 /// follower catches up instead.
-///
-/// Example usage with a camera:
-/// ```dart
-/// final followBehavior = AdvancedFollowBehavior(
-///   target: player,
-///   stiffness: 0.8,
-///   deadZone: CircularDeadZone(radius: 50),
-///   offset: Vector2(0, -100),
-/// );
-/// camera.viewfinder.add(followBehavior);
-/// ```
-class AdvancedFollowBehavior extends FollowBehavior {
+class ChaseBehavior extends FollowBehavior {
   /// The area around the target within which the follower does not move.
   /// Defaults to a [CircularDeadZone] with a radius of `0` if not provided.
   DeadZone deadZone;
@@ -46,15 +47,15 @@ class AdvancedFollowBehavior extends FollowBehavior {
   /// Temporary vector holding the point being followed during update.
   final _tempTarget = Vector2.zero();
 
-  /// Creates an [AdvancedFollowBehavior].
+  /// Creates a [ChaseBehavior].
   ///
   /// - [stiffness]: Controls how quickly the follower moves towards the target. Clamped between 0.0 and 1.0.
   /// - [deadZone]: Optional dead zone area; defaults to a [CircularDeadZone] with a radius of 0.
   /// - [offset]: Optional offset applied to the target's position.
-  /// - [target]: The [PositionComponent] to follow.
+  /// - [target]: The [ReadOnlyPositionProvider] to follow, such as a component.
   /// - [horizontalOnly]: If true, only follows in the horizontal direction.
   /// - [verticalOnly]: If true, only follows in the vertical direction.
-  AdvancedFollowBehavior({
+  ChaseBehavior({
     double stiffness = 1.0,
     DeadZone? deadZone,
     Vector2? offset,
@@ -130,3 +131,7 @@ class AdvancedFollowBehavior extends FollowBehavior {
     if (!_tempDelta.isZero()) owner.position += _tempDelta;
   }
 }
+
+/// Deprecated alias for [ChaseBehavior].
+@Deprecated('Use ChaseBehavior instead. Will be removed in 6.0.0.')
+typedef AdvancedFollowBehavior = ChaseBehavior;

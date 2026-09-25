@@ -18,7 +18,7 @@ void main() {
 class FlameCameraToolsExampleGame extends FlameGame
     with HasKeyboardHandlerComponents {
   late final Player player;
-  late final AdvancedFollowBehavior followBehavior;
+  late final ChaseBehavior chase;
 
   @override
   FutureOr<void> onLoad() async {
@@ -40,7 +40,7 @@ class FlameCameraToolsExampleGame extends FlameGame
 
     // Follow the player smoothly. The player can move freely inside the
     // dead zone before the camera starts following.
-    followBehavior = camera.chase(
+    chase = camera.chase(
       player,
       stiffness: 0.97,
       deadZone: RectangularDeadZone.symmetric(horizontal: 80, vertical: 48),
@@ -94,7 +94,7 @@ class Player extends RectangleComponent
     }
 
     // Look ahead in the direction the player is moving
-    game.followBehavior.offset
+    game.chase.offset
       ..setFrom(_direction)
       ..scale(192);
   }
