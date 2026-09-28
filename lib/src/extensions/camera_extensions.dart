@@ -6,6 +6,8 @@ import 'package:flame/effects.dart';
 
 import '../behaviors/chase_behavior.dart';
 import '../behaviors/dead_zone.dart';
+import '../behaviors/target_group.dart';
+import '../behaviors/zoom_to_fit.dart';
 import '../effects/shake_effect.dart';
 
 /// Components added by [FlameCameraTools] that are not mounted yet, with the
@@ -29,19 +31,26 @@ final _pending = Expando<Map<Component, Completer<void>>>();
 /// finishes or is cancelled, so effects can be awaited or chained:
 ///
 /// ```dart
-/// camera.chase(player, stiffness: 0.9);
+/// camera.chase(player, stiffness: 0.5);
 /// await camera.zoomTo(1.5, EffectController(duration: 1));
 /// await camera.shake(10, EffectController(duration: 0.5));
 /// ```
 extension FlameCameraTools on CameraComponent {
   /// Smoothly follows a target [ReadOnlyPositionProvider] using [ChaseBehavior].
   ///
-  /// - [stiffness]: How quickly the camera follows the target (0.0–1.0).
+  /// To follow several targets, pass a [TargetGroup]. The camera then follows
+  /// the center of the group.
+  ///
+  /// - [stiffness]: How quickly the camera follows the target (0.0–1.0). See
+  ///   [ChaseBehavior.stiffness] for the scale.
   /// - [deadZone]: Optional dead zone to prevent camera movements within a defined area.
   /// - [offset]: Optional positional offset applied to the target.
   /// - [horizontalOnly]: If true, only follows in the horizontal direction.
   /// - [verticalOnly]: If true, only follows in the vertical direction.
-  /// - [snap]: If true, immediately moves the camera to the target's position plus [offset].
+  /// - [zoomToFit]: Only for a [TargetGroup]. Also zooms so that the whole
+  ///   group stays in view, and cancels running zoom effects.
+  /// - [snap]: If true, immediately moves the camera to the target's position
+  ///   plus [offset], and with [zoomToFit] also sets the zoom.
   ///
   /// Returns the [ChaseBehavior] instance, allowing later adjustments to its settings.
   ChaseBehavior chase(
@@ -51,9 +60,11 @@ extension FlameCameraTools on CameraComponent {
     Vector2? offset,
     bool horizontalOnly = false,
     bool verticalOnly = false,
+    ZoomToFit? zoomToFit,
     bool snap = false,
   }) {
     _stop();
+    if (zoomToFit != null) _removeEffects<ScaleEffect>();
 
     final chaseBehavior = ChaseBehavior(
       target: target,
@@ -62,12 +73,22 @@ extension FlameCameraTools on CameraComponent {
       offset: offset,
       horizontalOnly: horizontalOnly,
       verticalOnly: verticalOnly,
+      zoomToFit: zoomToFit,
     );
 
     _add(chaseBehavior);
 
-    if (snap) {
+    if (snap && !(target is TargetGroup && target.isEmpty)) {
       viewfinder.position = target.position + chaseBehavior.offset;
+
+      final zoom = target is TargetGroup
+          ? zoomToFit?.zoomFor(
+              target,
+              viewfinder.position,
+              viewport.virtualSize,
+            )
+          : null;
+      if (zoom != null) viewfinder.zoom = zoom;
     }
 
     return chaseBehavior;
@@ -114,32 +135,34 @@ extension FlameCameraTools on CameraComponent {
     return _add(ScaleEffect.to(Vector2.all(value), controller));
   }
 
-  /// Rotates the camera by a relative [angle] in degrees.
+  /// Rotates the camera by a relative [angle] in radians.
   ///
-  /// - [angle]: Amount to rotate the camera by in degrees.
+  /// - [angle]: Amount to rotate the camera by in radians. To use degrees,
+  ///   convert them with `radians()`, for example `radians(45)`.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
   ///
   /// Returns a [Future] that completes when the rotation finishes or is cancelled.
   Future<void> rotateBy(double angle, EffectController controller) {
     _removeEffects<RotateEffect>();
 
-    return _add(RotateEffect.by(radians(angle), controller));
+    return _add(RotateEffect.by(angle, controller));
   }
 
-  /// Rotates the camera to an absolute [angle] in degrees.
+  /// Rotates the camera to an absolute [angle] in radians.
   ///
-  /// - [angle]: The angle to rotate the camera to in degrees.
+  /// - [angle]: The angle to rotate the camera to in radians. To use degrees,
+  ///   convert them with `radians()`, for example `radians(45)`.
   /// - [controller]: Controls the duration, interpolation curve, and smoothing of the rotation.
   ///
   /// The camera rotates by the difference between [angle] and its current
   /// angle, without taking the shortest way round. For example, rotating
-  /// from `350` to `0` turns back 350 degrees rather than forward 10.
+  /// from `radians(350)` to `0` turns back 350 degrees rather than forward 10.
   ///
   /// Returns a [Future] that completes when the rotation finishes or is cancelled.
   Future<void> rotateTo(double angle, EffectController controller) {
     _removeEffects<RotateEffect>();
 
-    return _add(RotateEffect.to(radians(angle), controller));
+    return _add(RotateEffect.to(angle, controller));
   }
 
   /// Moves the camera directly to a [targetPosition].
@@ -164,7 +187,7 @@ extension FlameCameraTools on CameraComponent {
   /// await camera.effectSequence([
   ///   () => camera.shake(20.0, LinearEffectController(0.5)),
   ///   () => camera.zoomTo(2.0, LinearEffectController(0.5)),
-  ///   () => camera.rotateBy(45, LinearEffectController(0.5)),
+  ///   () => camera.rotateBy(pi / 4, LinearEffectController(0.5)),
   /// ]);
   /// ```
   Future<void> effectSequence(List<Future<void> Function()> effects) async {

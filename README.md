@@ -13,6 +13,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 ## Features
 
 * **Smooth Follow:** The camera can smoothly follow any target with adjustable stiffness. Supports configurable dead zones and offsets.
+* **Group Follow:** Follow several targets at once, zooming out as they spread apart so that all of them stay in view.
 * **Shake Effect:** Apply a randomized shake effect to the camera or any `PositionProvider`. The shake works on top of following, so the camera keeps tracking its target while it shakes.
 * **Zooming:** Zoom in and out, either relative to the current zoom or to an absolute zoom level.
 * **Rotating:** Rotate the camera by a specified angle or to an absolute angle.
@@ -22,7 +23,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 * **Simultaneous Effects:** Apply multiple effects at once for dynamic interactions.
 * **Not Only for Cameras:** The shake effect and the follow behavior can be added to any component.
 
-See [`example/main.dart`](example/main.dart) for a runnable demo: move with WASD and press Space to shake the camera.
+See [`example/main.dart`](example/main.dart) for a runnable demo: move with WASD and press Space to shake the camera. [`example/group_chase.dart`](example/group_chase.dart) shows the camera following a group of wandering bots.
 
 
 ## Usage
@@ -45,19 +46,23 @@ Starting an effect replaces a running effect of the same kind, so a new zoom rep
 
 ### Smoothly Follow a Component
 
-![Camera smoothly following a player](assets/chase.gif)
+**Smooth follow**
 
-![Camera following a player that moves freely inside a dead zone](assets/dead_zone.gif)
+![Camera smoothly following a player](https://raw.githubusercontent.com/bszarlej/flame_camera_tools/master/assets/chase.gif)
 
-Use `chase()` to make the camera follow a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns a `ChaseBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
+**Dead zone**
+
+![Camera following a player that moves freely inside a dead zone](https://raw.githubusercontent.com/bszarlej/flame_camera_tools/master/assets/dead_zone.gif)
+
+Use `chase()` to make the camera chase a target with adjustable stiffness and an optional dead zone. The target can be a component or any other `ReadOnlyPositionProvider`. It returns a `ChaseBehavior` instance, which allows you to tweak options like `offset`, `deadZone`, and `stiffness` later on:
 
 ```dart
-final follow = camera.chase(component, stiffness: 0.95);
+final chase = camera.chase(component, stiffness: 0.5);
 
 // Later, you can adjust settings
-follow.offset = Vector2(0, -50);
-follow.deadZone = CircularDeadZone(radius: 80);
-follow.stiffness = 0.9;
+chase.offset = Vector2(0, -50);
+chase.deadZone = CircularDeadZone(radius: 80);
+chase.stiffness = 0.7;
 ```
 
 `CameraComponent.chase` parameters:
@@ -65,7 +70,7 @@ follow.stiffness = 0.9;
 ```dart
 camera.chase(
   component,
-  stiffness: 0.95,
+  stiffness: 0.5,
   deadZone: RectangularDeadZone.all(100),
   offset: Vector2(0, -50),
   horizontalOnly: false,
@@ -74,7 +79,7 @@ camera.chase(
 );
 ```
 
-* `stiffness`: How quickly the camera catches up, from `0.0` (never moves) to `1.0` (follows instantly). It behaves the same at any frame rate.
+* `stiffness`: How quickly the camera catches up, from `0.0` (never moves) to `1.0` (follows instantly). At `0.5` it closes half the distance to the target in 0.2 seconds; lower values are floatier, higher values tighter. It behaves the same at any frame rate.
 * `deadZone`: An area around the camera in which the target can move without the camera following. Use `CircularDeadZone`, `RectangularDeadZone` or your own `DeadZone` implementation.
 * `offset`: Follows a point offset from the target, for example to look ahead of a moving player.
 * `horizontalOnly` / `verticalOnly`: Only follow along one axis.
@@ -84,6 +89,39 @@ To stop following, call Flame's `stop()`:
 ```dart
 camera.stop();
 ```
+
+#### Following Several Targets
+
+**Group follow with zoom to fit**
+
+![Camera zooming out and in to keep a group of wandering bots in view](https://raw.githubusercontent.com/bszarlej/flame_camera_tools/master/assets/group_chase.gif)
+
+To keep several targets in view, for example in local multiplayer, chase a `TargetGroup`. The camera follows the center of the group, and with `zoomToFit` it also zooms out as the targets spread apart:
+
+```dart
+final players = TargetGroup([player1, player2]);
+
+camera.chase(
+  players,
+  stiffness: 0.5,
+  zoomToFit: const ZoomToFit(
+    padding: 100, // space to keep around the outermost targets
+    minZoom: 0.5, // never zoom out further than this
+    maxZoom: 1, // never zoom in further than this
+  ),
+);
+
+// Players can join and leave at any time
+players.add(player3);
+players.remove(player1);
+```
+
+* `padding`: Extra space in world units between the outermost targets and the edge of the screen. Components are always kept fully in view, whatever their size and anchor, so padding is only needed for breathing room.
+* `minZoom` / `maxZoom`: Limits for the zoom. With the default `maxZoom` of `1`, the camera keeps its normal zoom while the targets are close together and only zooms out when they spread apart. The default `minZoom` of `0` never stops zooming out.
+
+`deadZone`, `offset` and the axis locks work with groups too. A small dead zone keeps the camera calm while single targets move around. The fit is measured from where the camera actually is, so the targets stay in view even when an offset or dead zone keeps the camera away from the center of the group, or while it catches up with a fast group.
+
+The zoom follows with the same `stiffness` as the movement, and `snap` sets it right away. Chasing with `zoomToFit` cancels running zoom effects, and zooming with `zoomTo()` or `zoomBy()` while it runs makes them fight over the zoom. While the group is empty, the camera stays where it is.
 
 #### Custom Dead Zones
 
@@ -154,7 +192,7 @@ await camera.zoomTo(2.0, LinearEffectController(1.0));
 Rotate the camera by a relative angle:
 
 ```dart
-await camera.rotateBy(45, LinearEffectController(1.0)); // rotate 45 degrees
+await camera.rotateBy(pi / 4, LinearEffectController(1.0)); // rotate 45 degrees
 ```
 
 Or rotate to an absolute angle:
@@ -163,12 +201,10 @@ Or rotate to an absolute angle:
 await camera.rotateTo(0, LinearEffectController(1.0)); // back to upright
 ```
 
-* `angle`: Relative rotation or absolute angle in degrees.
+* `angle`: Relative rotation or absolute angle in radians, like everywhere else in Flame. To use degrees, convert them with `radians()`, for example `radians(45)`.
 * `controller`: Controls duration, curve, and smoothing.
 
-`rotateTo` rotates by the difference to the current angle, without taking the shortest way round: from `350` to `0` it turns back 350 degrees rather than forward 10.
-
-> **Note:** Unlike most of Flame, which uses radians, `rotateBy` and `rotateTo` take degrees. Pass `45` rather than `pi / 4`.
+`rotateTo` rotates by the difference to the current angle, without taking the shortest way round: from `radians(350)` to `0` it turns back 350 degrees rather than forward 10.
 
 ---
 
@@ -192,7 +228,7 @@ Chain multiple effects in sequence:
 await camera.effectSequence([
   () => camera.shake(10.0, LinearEffectController(0.5)),
   () => camera.zoomTo(1.5, LinearEffectController(1.0)),
-  () => camera.rotateBy(45, LinearEffectController(0.5)),
+  () => camera.rotateBy(pi / 4, LinearEffectController(0.5)),
 ]);
 ```
 
@@ -208,7 +244,7 @@ You can apply multiple effects at the same time:
 camera
   ..shake(7.0, LinearEffectController(4))
   ..zoomTo(0.75, LinearEffectController(1.0))
-  ..rotateBy(45, LinearEffectController(1.0));
+  ..rotateBy(pi / 4, LinearEffectController(1.0));
 ```
 
 ---
@@ -225,7 +261,7 @@ enemy.add(ShakeEffect(5, EffectController(duration: 0.3)));
 pet.add(
   ChaseBehavior(
     target: player,
-    stiffness: 0.9,
+    stiffness: 0.4,
     offset: Vector2(-40, 0),
   ),
 );

@@ -29,9 +29,9 @@ void main() {
       'zoomBy': (camera) => camera.zoomBy(0.5, EffectController(duration: 1)),
       'zoomTo': (camera) => camera.zoomTo(2, EffectController(duration: 1)),
       'rotateBy': (camera) =>
-          camera.rotateBy(45, EffectController(duration: 1)),
+          camera.rotateBy(pi / 4, EffectController(duration: 1)),
       'rotateTo': (camera) =>
-          camera.rotateTo(45, EffectController(duration: 1)),
+          camera.rotateTo(pi / 4, EffectController(duration: 1)),
       'lookAt': (camera) =>
           camera.lookAt(Vector2(100, 100), EffectController(duration: 1)),
     };
@@ -123,9 +123,9 @@ void main() {
   });
 
   group('rotateBy', () {
-    testWithFlameGame('takes the angle in degrees', (game) async {
+    testWithFlameGame('takes the angle in radians', (game) async {
       final camera = game.camera;
-      camera.rotateBy(90, EffectController(duration: 1));
+      camera.rotateBy(pi / 2, EffectController(duration: 1));
       await tick(game, 1.1);
 
       expect(camera.viewfinder.angle, closeTo(pi / 2, 1e-4));
@@ -133,12 +133,12 @@ void main() {
   });
 
   group('rotateTo', () {
-    testWithFlameGame('ends at the given angle in degrees', (game) async {
+    testWithFlameGame('ends at the given angle in radians', (game) async {
       final camera = game.camera;
-      camera.rotateBy(30, EffectController(duration: 0.1));
+      camera.rotateBy(radians(30), EffectController(duration: 0.1));
       await tick(game, 0.2);
 
-      camera.rotateTo(90, EffectController(duration: 1));
+      camera.rotateTo(pi / 2, EffectController(duration: 1));
       await tick(game, 1.1);
 
       expect(camera.viewfinder.angle, closeTo(pi / 2, 1e-4));
@@ -146,7 +146,7 @@ void main() {
 
     testWithFlameGame('replaces a running rotateBy', (game) async {
       final camera = game.camera;
-      camera.rotateBy(90, EffectController(duration: 10));
+      camera.rotateBy(pi / 2, EffectController(duration: 10));
       await tick(game, 1);
 
       camera.rotateTo(0, EffectController(duration: 1));
@@ -158,7 +158,7 @@ void main() {
 
     testWithFlameGame('does not take the shortest way round', (game) async {
       final camera = game.camera;
-      camera.rotateBy(350, EffectController(duration: 0.1));
+      camera.rotateBy(radians(350), EffectController(duration: 0.1));
       await tick(game, 0.2);
 
       camera.rotateTo(0, EffectController(duration: 1));
@@ -220,6 +220,82 @@ void main() {
     });
   });
 
+  group('chase with a TargetGroup', () {
+    TargetGroup spread() => TargetGroup([
+          PositionComponent(),
+          PositionComponent(position: Vector2(1600, 0)),
+        ]);
+
+    testWithFlameGame('snap moves and zooms straight to the group',
+        (game) async {
+      final camera = game.camera;
+      camera.chase(
+        spread(),
+        stiffness: 0,
+        offset: Vector2(0, -30),
+        zoomToFit: const ZoomToFit(),
+        snap: true,
+      );
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(800, -30)));
+      expect(camera.viewfinder.zoom, closeTo(0.5, 1e-4));
+    });
+
+    testWithFlameGame('snap without zoomToFit keeps the zoom', (game) async {
+      final camera = game.camera;
+      camera.chase(spread(), stiffness: 0, snap: true);
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(800, 0)));
+      expect(camera.viewfinder.zoom, closeTo(1, 1e-4));
+    });
+
+    testWithFlameGame('snap to an empty group does not move', (game) async {
+      final camera = game.camera;
+      camera.viewfinder.position = Vector2(100, 100);
+      camera.chase(TargetGroup(), zoomToFit: const ZoomToFit(), snap: true);
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(100, 100)));
+    });
+
+    testWithFlameGame('zoomToFit cancels running zoom effects', (game) async {
+      final camera = game.camera;
+      final done = track(camera.zoomTo(3, EffectController(duration: 1)));
+      await tick(game, 0.1);
+
+      camera.chase(spread(), zoomToFit: const ZoomToFit());
+      await tick(game, 0.1);
+
+      expect(done(), isTrue);
+      expect(camera.viewfinder.children.whereType<ScaleEffect>(), isEmpty);
+    });
+
+    testWithFlameGame('without zoomToFit, keeps running zoom effects',
+        (game) async {
+      final camera = game.camera;
+      final done = track(camera.zoomTo(3, EffectController(duration: 1)));
+      await tick(game, 0.1);
+
+      camera.chase(spread());
+      await tick(game, 0.1);
+
+      expect(done(), isFalse);
+    });
+
+    testWithFlameGame('stops with camera.stop()', (game) async {
+      final camera = game.camera;
+      camera.chase(spread(), zoomToFit: const ZoomToFit());
+      await tick(game, 0.1);
+
+      camera.stop();
+      await tick(game, 0.1);
+      final zoom = camera.viewfinder.zoom;
+      await tick(game, 0.1);
+
+      expect(camera.viewfinder.children.whereType<FollowBehavior>(), isEmpty);
+      expect(camera.viewfinder.zoom, zoom);
+    });
+  });
+
   group('effectSequence', () {
     testWithFlameGame('runs each effect after the previous one', (game) async {
       final camera = game.camera;
@@ -232,7 +308,7 @@ void main() {
           },
           () {
             started.add('rotate');
-            return camera.rotateBy(45, EffectController(duration: 1));
+            return camera.rotateBy(pi / 4, EffectController(duration: 1));
           },
         ]),
       );
@@ -256,7 +332,7 @@ void main() {
           () => camera.zoomTo(2, EffectController(duration: 10)),
           () {
             rotateStarted = true;
-            return camera.rotateBy(45, EffectController(duration: 1));
+            return camera.rotateBy(pi / 4, EffectController(duration: 1));
           },
         ]),
       );

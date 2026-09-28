@@ -42,7 +42,7 @@ class FlameCameraToolsExampleGame extends FlameGame
     // dead zone before the camera starts following.
     chase = camera.chase(
       player,
-      stiffness: 0.97,
+      stiffness: 0.5,
       deadZone: RectangularDeadZone.symmetric(horizontal: 80, vertical: 48),
     );
 
