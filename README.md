@@ -23,7 +23,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 * **Simultaneous Effects:** Apply multiple effects at once for dynamic interactions.
 * **Not Only for Cameras:** The shake effect and the follow behavior can be added to any component.
 
-See [`example/main.dart`](example/main.dart) for a runnable demo: move with WASD and press Space to shake the camera. [`example/group_chase.dart`](example/group_chase.dart) shows the camera following a group of wandering bots.
+See [`example/lib/main.dart`](example/lib/main.dart) for a runnable demo: move with WASD and press Space to shake the camera. [`example/lib/group_chase.dart`](example/lib/group_chase.dart) shows the camera following a group of wandering bots.
 
 
 ## Usage
