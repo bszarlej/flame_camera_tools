@@ -47,7 +47,8 @@ jobs:
           cache: true
 
       - name: Install minimum dependencies
-        run: flutter pub downgrade
+        # Skip the example app, which needs a newer SDK than the package.
+        run: flutter pub downgrade --no-example
 
       - name: Run tests
         run: flutter test
