@@ -51,4 +51,6 @@ jobs:
         run: flutter pub downgrade --no-example
 
       - name: Run tests
-        run: flutter test
+        # --no-pub skips the pub get that flutter test runs first, which would
+        # resolve the example app again.
+        run: flutter test --no-pub
