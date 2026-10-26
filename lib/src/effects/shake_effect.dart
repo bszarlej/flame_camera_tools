@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 
+import 'shake_offsets.dart';
+
 /// An effect that shakes a [PositionComponent] by randomly offsetting its position.
 ///
 /// The shake amplitude decreases over time according to the [EffectController]'s progress,
@@ -11,6 +13,11 @@ import 'package:flame/effects.dart';
 /// The offset is applied on top of the target's position, so the target can
 /// keep moving while it shakes, for example while a camera follows a player.
 /// The offset is undone when the effect finishes or is removed.
+///
+/// `ChaseBehavior`, which `camera.chase()` uses, follows from where the target
+/// would be without the shake, so the shake keeps its amplitude. Other
+/// followers, such as Flame's `camera.follow()`, pull the target back from
+/// each offset, which can make the shake up to twice as strong.
 ///
 /// Speed-based controllers such as `EffectController(speed: ...)` are not
 /// supported, since a shake has no distance to cover. Use a duration instead.
@@ -59,16 +66,23 @@ class ShakeEffect extends Effect with EffectTarget<PositionProvider> {
     final dy = (_rng.nextDouble() * 2 - 1) * currentAmp;
 
     // Replace the previous offset with the new one
-    target.position += Vector2(dx - _offset.x, dy - _offset.y);
+    _move(Vector2(dx - _offset.x, dy - _offset.y));
     _offset.setValues(dx, dy);
   }
 
   @override
   void onRemove() {
     if (!_offset.isZero()) {
-      target.position -= _offset;
+      _move(-_offset);
       _offset.setZero();
     }
     super.onRemove();
+  }
+
+  /// Moves the target by [delta] and records it in [shakeOffsets], so that
+  /// followers can tell the shake apart from other movement.
+  void _move(Vector2 delta) {
+    target.position += delta;
+    (shakeOffsets[target] ??= Vector2.zero()).add(delta);
   }
 }

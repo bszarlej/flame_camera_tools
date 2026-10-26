@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 
+import '../effects/shake_effect.dart';
+import '../effects/shake_offsets.dart';
 import 'dead_zone.dart';
 import 'target_group.dart';
 import 'zoom_to_fit.dart';
@@ -33,6 +35,9 @@ import 'zoom_to_fit.dart';
 /// camera's [Viewfinder], [zoomToFit] then also zooms so that the whole group
 /// stays in view.
 ///
+/// A [ShakeEffect] on the follower plays on top of the chase: the follower
+/// moves, and with [zoomToFit] zooms, as if it were not shaking.
+///
 /// The inherited [maxSpeed] is not used; [stiffness] controls how fast the
 /// follower catches up instead.
 class ChaseBehavior extends FollowBehavior {
@@ -59,6 +64,10 @@ class ChaseBehavior extends FollowBehavior {
 
   /// Temporary vector holding the point being followed during update.
   final _tempTarget = Vector2.zero();
+
+  /// Temporary vector holding the follower's position without shaking
+  /// during update.
+  final _tempPosition = Vector2.zero();
 
   /// Creates a [ChaseBehavior].
   ///
@@ -147,16 +156,23 @@ class ChaseBehavior extends FollowBehavior {
 
     if (target is TargetGroup && target.isEmpty) return;
 
+    // Follow from where the follower would be without shaking. A shake only
+    // moves it by the change of its offset each frame, so pulling it back
+    // from the offset would add to the shake.
+    _tempPosition.setFrom(owner.position);
+    final shakeOffset = shakeOffsets[owner];
+    if (shakeOffset != null) _tempPosition.sub(shakeOffset);
+
     _tempTarget
       ..setFrom(target.position)
       ..add(offset);
 
     // Lock the ignored axis before the dead zone check, so the distance on
     // that axis can't count towards leaving the dead zone.
-    if (_horizontalOnly) _tempTarget.y = owner.position.y;
-    if (_verticalOnly) _tempTarget.x = owner.position.x;
+    if (_horizontalOnly) _tempTarget.y = _tempPosition.y;
+    if (_verticalOnly) _tempTarget.x = _tempPosition.x;
 
-    _tempDelta.setFrom(deadZone.computeDelta(owner.position, _tempTarget));
+    _tempDelta.setFrom(deadZone.computeDelta(_tempPosition, _tempTarget));
 
     // Custom dead zones may still return movement on a locked axis.
     if (_horizontalOnly) _tempDelta.y = 0;
@@ -169,14 +185,18 @@ class ChaseBehavior extends FollowBehavior {
     if (distance > deltaOffset) {
       _tempDelta.scale(deltaOffset / distance);
     }
-    if (!_tempDelta.isZero()) owner.position += _tempDelta;
+    if (!_tempDelta.isZero()) {
+      owner.position += _tempDelta;
+      _tempPosition.add(_tempDelta);
+    }
 
     final zoomToFit = this.zoomToFit;
-    if (zoomToFit != null) _updateZoom(zoomToFit, lerpFactor);
+    if (zoomToFit != null) _updateZoom(zoomToFit, _tempPosition, lerpFactor);
   }
 
-  /// Moves the zoom of the viewfinder towards the level [zoomToFit] asks for.
-  void _updateZoom(ZoomToFit zoomToFit, double lerpFactor) {
+  /// Moves the zoom of the viewfinder towards the level [zoomToFit] asks for
+  /// with the camera at [position].
+  void _updateZoom(ZoomToFit zoomToFit, Vector2 position, double lerpFactor) {
     final target = this.target;
     final viewfinder = owner;
     assert(target is TargetGroup, 'zoomToFit needs a TargetGroup as target');
@@ -185,7 +205,7 @@ class ChaseBehavior extends FollowBehavior {
 
     final zoom = zoomToFit.zoomFor(
       target,
-      viewfinder.position,
+      position,
       viewfinder.camera.viewport.virtualSize,
     );
     if (zoom == null) return;

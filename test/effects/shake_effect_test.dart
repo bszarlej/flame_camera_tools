@@ -127,6 +127,59 @@ void main() {
       );
     });
 
+    testWithFlameGame('stays within the amplitude while chasing', (game) async {
+      final camera = game.camera;
+      final target = PositionComponent(position: Vector2(100, 50));
+      camera.chase(target);
+      camera.shake(10, EffectController(duration: 1));
+
+      for (var i = 0; i < 100; i++) {
+        await tick(game, 0.01);
+
+        final offset = camera.viewfinder.position - target.position;
+        expect(offset.x.abs(), lessThanOrEqualTo(10 + epsilon));
+        expect(offset.y.abs(), lessThanOrEqualTo(10 + epsilon));
+      }
+    });
+
+    testWithFlameGame('does not change the zoom of zoomToFit', (game) async {
+      final camera = game.camera;
+      camera.chase(
+        TargetGroup([
+          PositionComponent(),
+          PositionComponent(position: Vector2(1600, 0)),
+        ]),
+        zoomToFit: const ZoomToFit(),
+        snap: true,
+      );
+      camera.shake(10, EffectController(duration: 1));
+
+      for (var i = 0; i < 100; i++) {
+        await tick(game, 0.01);
+
+        expect(camera.viewfinder.zoom, closeTo(0.5, epsilon));
+      }
+    });
+
+    testWithFlameGame('keeps playing on top of a snap', (game) async {
+      final camera = game.camera;
+      camera.shake(10, EffectController(duration: 1));
+      await tick(game, 0.5);
+
+      final target = PositionComponent(position: Vector2(100, 50));
+      camera.chase(target, stiffness: 0.1, snap: true);
+      for (var i = 0; i < 6; i++) {
+        await tick(game, 0.1);
+      }
+
+      // The shake is over, so the camera is back where the snap put it.
+      expect(camera.viewfinder.children.whereType<ShakeEffect>(), isEmpty);
+      expect(
+        camera.viewfinder.position,
+        closeToVector(target.position, epsilon),
+      );
+    });
+
     testWithFlameGame('is not cancelled by chase or lookAt', (game) async {
       final camera = game.camera;
       var done = false;

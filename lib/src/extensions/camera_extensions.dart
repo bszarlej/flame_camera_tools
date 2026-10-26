@@ -9,6 +9,7 @@ import '../behaviors/dead_zone.dart';
 import '../behaviors/target_group.dart';
 import '../behaviors/zoom_to_fit.dart';
 import '../effects/shake_effect.dart';
+import '../effects/shake_offsets.dart';
 
 /// Components added by [FlameCameraTools] that are not mounted yet, with the
 /// completers of the futures returned for them.
@@ -79,14 +80,14 @@ extension FlameCameraTools on CameraComponent {
     _add(chaseBehavior);
 
     if (snap && !(target is TargetGroup && target.isEmpty)) {
-      viewfinder.position = target.position + chaseBehavior.offset;
+      final position = target.position + chaseBehavior.offset;
+      // Snap underneath a running shake, so that it keeps playing on top.
+      final shakeOffset = shakeOffsets[viewfinder];
+      viewfinder.position =
+          shakeOffset == null ? position : position + shakeOffset;
 
       final zoom = target is TargetGroup
-          ? zoomToFit?.zoomFor(
-              target,
-              viewfinder.position,
-              viewport.virtualSize,
-            )
+          ? zoomToFit?.zoomFor(target, position, viewport.virtualSize)
           : null;
       if (zoom != null) viewfinder.zoom = zoom;
     }
