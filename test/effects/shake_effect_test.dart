@@ -180,6 +180,25 @@ void main() {
       );
     });
 
+    testWithFlameGame('does not throw lookAt off its destination',
+        (game) async {
+      final camera = game.camera;
+      camera.shake(10, EffectController(duration: 1));
+      await tick(game, 0.3);
+
+      camera.lookAt(Vector2(200, 100), EffectController(duration: 0.2));
+      for (var i = 0; i < 8; i++) {
+        await tick(game, 0.1);
+      }
+
+      // Both are over, so the camera is exactly where lookAt sent it.
+      expect(camera.viewfinder.children.whereType<ShakeEffect>(), isEmpty);
+      expect(
+        camera.viewfinder.position,
+        closeToVector(Vector2(200, 100), epsilon),
+      );
+    });
+
     testWithFlameGame('is not cancelled by chase or lookAt', (game) async {
       final camera = game.camera;
       var done = false;

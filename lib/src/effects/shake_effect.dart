@@ -14,10 +14,12 @@ import 'shake_offsets.dart';
 /// keep moving while it shakes, for example while a camera follows a player.
 /// The offset is undone when the effect finishes or is removed.
 ///
-/// `ChaseBehavior`, which `camera.chase()` uses, follows from where the target
-/// would be without the shake, so the shake keeps its amplitude. Other
-/// followers, such as Flame's `camera.follow()`, pull the target back from
-/// each offset, which can make the shake up to twice as strong.
+/// `ChaseBehavior`, which `camera.chase()` uses, and `camera.lookAt()` work
+/// from where the target would be without the shake, so the shake keeps its
+/// amplitude and moves end where they should. Flame's own followers and move
+/// effects, such as `camera.follow()` and [MoveToEffect], don't know about
+/// the shake: following can make it up to twice as strong, and a move that
+/// starts during a shake ends off by the shake offset at that moment.
 ///
 /// Speed-based controllers such as `EffectController(speed: ...)` are not
 /// supported, since a shake has no distance to cover. Use a duration instead.

@@ -169,6 +169,29 @@ void main() {
     });
   });
 
+  group('lookAt', () {
+    testWithFlameGame('moves to the position', (game) async {
+      final camera = game.camera;
+      camera.lookAt(Vector2(100, 50), EffectController(duration: 1));
+      await tick(game, 0.5);
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(50, 25), 1e-4));
+
+      await tick(game, 0.5);
+
+      expect(camera.viewfinder.position, closeToVector(Vector2(100, 50), 1e-4));
+    });
+
+    testWithFlameGame('supports speed-based controllers', (game) async {
+      final camera = game.camera;
+      camera.lookAt(Vector2(100, 0), EffectController(speed: 100));
+      await tick(game, 0.5);
+
+      // 100 away at a speed of 100 takes a second, so this is halfway.
+      expect(camera.viewfinder.position, closeToVector(Vector2(50, 0), 1e-4));
+    });
+  });
+
   group('chase', () {
     testWithFlameGame('keeps only the last follow behavior of a frame',
         (game) async {

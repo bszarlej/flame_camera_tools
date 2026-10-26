@@ -180,7 +180,7 @@ extension FlameCameraTools on CameraComponent {
   Future<void> lookAt(Vector2 targetPosition, EffectController controller) {
     _stop();
 
-    return _add(MoveToEffect(targetPosition, controller));
+    return _add(_LookAtEffect(targetPosition, controller));
   }
 
   /// Plays a sequence of camera effects in order.
@@ -249,5 +249,49 @@ extension FlameCameraTools on CameraComponent {
       if (!completer.isCompleted) completer.complete();
       return true;
     });
+  }
+}
+
+/// Moves its target to a destination like [MoveToEffect], but measures the
+/// way there from where the target would be without shaking.
+///
+/// [MoveToEffect] measures from the shaken position, so a move that starts
+/// during a shake would end off by the shake offset at that moment.
+class _LookAtEffect extends MoveEffect {
+  _LookAtEffect(Vector2 destination, EffectController controller)
+      : _destination = destination.clone(),
+        super(controller, null);
+
+  final Vector2 _destination;
+
+  /// The way from the unshaken target to [_destination].
+  final _offset = Vector2.zero();
+
+  @override
+  void onMount() {
+    super.onMount();
+    // Like MoveToEffect, so that speed-based controllers can tell their
+    // duration before the effect starts.
+    _updateOffset();
+  }
+
+  @override
+  void onStart() => _updateOffset();
+
+  @override
+  void apply(double progress) {
+    final dProgress = progress - previousProgress;
+    target.position += _offset * dProgress;
+  }
+
+  @override
+  double measure() => _offset.length;
+
+  void _updateOffset() {
+    _offset
+      ..setFrom(_destination)
+      ..sub(target.position);
+    final shakeOffset = shakeOffsets[target];
+    if (shakeOffset != null) _offset.add(shakeOffset);
   }
 }
