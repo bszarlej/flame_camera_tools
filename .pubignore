@@ -4,6 +4,14 @@
 # README images, which pub.dev loads from the repository instead.
 assets/
 
+# The example app's platform folders.
+example/android/
+example/ios/
+example/linux/
+example/macos/
+example/web/
+example/windows/
+
 # Miscellaneous
 *.class
 *.log
