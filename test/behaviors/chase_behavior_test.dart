@@ -417,6 +417,28 @@ void main() {
       expect(viewfinder.zoom, closeTo(300 / 800, epsilon));
     });
 
+    testWithFlameGame('keeps the group in view with an off-center anchor',
+        (game) async {
+      game.camera.viewfinder.anchor = const Anchor(0.5, 0.3);
+      final viewfinder = await addToCamera(
+        game,
+        ChaseBehavior(
+          target: TargetGroup([
+            PositionComponent(),
+            PositionComponent(position: Vector2(0, 1200)),
+          ]),
+          zoomToFit: const ZoomToFit(),
+        ),
+      );
+
+      game.update(1 / 60);
+
+      // The camera is 30% down the screen, so the 180 pixels above it have to
+      // reach the top target 600 away.
+      expect(viewfinder.position, closeToVector(Vector2(0, 600), epsilon));
+      expect(viewfinder.zoom, closeTo(180 / 600, epsilon));
+    });
+
     testWithFlameGame('picks up targets added later', (game) async {
       final group = groupAtX([0]);
       final viewfinder = await addToCamera(

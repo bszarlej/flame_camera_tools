@@ -14,14 +14,20 @@ void main() {
     final viewport = Vector2(800, 600);
 
     /// The zoom for targets at [positions], with the camera at [camera] or,
-    /// by default, at the center of the group.
+    /// by default, at the center of the group, and shown at [anchor].
     double? fit(
       ZoomToFit zoomToFit,
       List<Vector2> positions, {
       Vector2? camera,
+      Anchor anchor = Anchor.center,
     }) {
       final group = groupAt(positions);
-      return zoomToFit.zoomFor(group, camera ?? group.position, viewport);
+      return zoomToFit.zoomFor(
+        group,
+        camera ?? group.position,
+        viewport,
+        anchor: anchor,
+      );
     }
 
     test('fits the width when that is the tighter side', () {
@@ -83,6 +89,33 @@ void main() {
       );
     });
 
+    test('splits the viewport at the anchor', () {
+      // With the camera 30% down the screen, the 180 pixels above it have to
+      // reach the top target 300 away.
+      expect(
+        fit(
+          const ZoomToFit(),
+          [Vector2(0, -300), Vector2(0, 300)],
+          anchor: const Anchor(0.5, 0.3),
+        ),
+        closeTo(180 / 300, epsilon),
+      );
+    });
+
+    test('leaves out sides the viewport does not reach', () {
+      // With the camera in the top left corner, nothing to its left or above
+      // it can be shown, so only the target to its right counts.
+      expect(
+        fit(
+          const ZoomToFit(maxZoom: 10),
+          [Vector2(-100, -100), Vector2(1600, 0)],
+          camera: Vector2.zero(),
+          anchor: Anchor.topLeft,
+        ),
+        closeTo(800 / 1600, epsilon),
+      );
+    });
+
     test('does not zoom in past maxZoom', () {
       final positions = [Vector2(0, 0), Vector2(200, 0)];
 
@@ -114,6 +147,14 @@ void main() {
           groupAt([Vector2.zero()]),
           Vector2.zero(),
           Vector2.zero(),
+        ),
+        isNull,
+      );
+      expect(
+        const ZoomToFit(minZoom: 0.5).zoomFor(
+          groupAt([Vector2.zero(), Vector2(100, 0)]),
+          Vector2.zero(),
+          Vector2(0, 600),
         ),
         isNull,
       );

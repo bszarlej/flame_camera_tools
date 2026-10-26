@@ -207,6 +207,7 @@ class ChaseBehavior extends FollowBehavior {
       target,
       position,
       viewfinder.camera.viewport.virtualSize,
+      anchor: viewfinder.anchor,
     );
     if (zoom == null) return;
 

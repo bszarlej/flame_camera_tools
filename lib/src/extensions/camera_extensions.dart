@@ -87,7 +87,12 @@ extension FlameCameraTools on CameraComponent {
           shakeOffset == null ? position : position + shakeOffset;
 
       final zoom = target is TargetGroup
-          ? zoomToFit?.zoomFor(target, position, viewport.virtualSize)
+          ? zoomToFit?.zoomFor(
+              target,
+              position,
+              viewport.virtualSize,
+              anchor: viewfinder.anchor,
+            )
           : null;
       if (zoom != null) viewfinder.zoom = zoom;
     }

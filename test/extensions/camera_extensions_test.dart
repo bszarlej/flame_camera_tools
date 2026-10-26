@@ -249,6 +249,24 @@ void main() {
       expect(camera.viewfinder.zoom, closeTo(1, 1e-4));
     });
 
+    testWithFlameGame('snap zooms to fit around an off-center anchor',
+        (game) async {
+      final camera = game.camera;
+      camera.viewfinder.anchor = const Anchor(0.5, 0.3);
+      camera.chase(
+        TargetGroup([
+          PositionComponent(position: Vector2(0, -300)),
+          PositionComponent(position: Vector2(0, 300)),
+        ]),
+        stiffness: 0,
+        zoomToFit: const ZoomToFit(),
+        snap: true,
+      );
+
+      // Only the 180 pixels above the camera can show the top target.
+      expect(camera.viewfinder.zoom, closeTo(180 / 300, 1e-4));
+    });
+
     testWithFlameGame('snap to an empty group does not move', (game) async {
       final camera = game.camera;
       camera.viewfinder.position = Vector2(100, 100);
