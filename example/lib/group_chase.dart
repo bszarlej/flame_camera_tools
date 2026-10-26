@@ -95,8 +95,12 @@ class Bot extends CircleComponent with HasGameReference<GroupChaseExampleGame> {
   FutureOr<void> onLoad() {
     final random = game.random;
     paint = Paint()
-      ..color =
-          HSVColor.fromAHSV(1, random.nextDouble() * 360, 0.7, 0.9).toColor();
+      ..color = HSVColor.fromAHSV(
+        1,
+        random.nextDouble() * 360,
+        0.7,
+        0.9,
+      ).toColor();
 
     _pickDestination();
     position.setFrom(_destination);

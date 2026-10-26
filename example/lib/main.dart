@@ -50,9 +50,9 @@ class FlameCameraToolsExampleGame extends FlameGame
     camera.effectSequence([
       () => camera.shake(20, EffectController(duration: 1)),
       () => camera.zoomTo(
-            1.5,
-            EffectController(duration: 2, curve: Curves.easeInOut),
-          ),
+        1.5,
+        EffectController(duration: 2, curve: Curves.easeInOut),
+      ),
     ]);
   }
 }
@@ -64,7 +64,7 @@ class Player extends RectangleComponent
   final _direction = Vector2.zero();
 
   Player({super.position, super.size})
-      : super(anchor: Anchor.center, paint: Paint()..color = Colors.red);
+    : super(anchor: Anchor.center, paint: Paint()..color = Colors.red);
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
