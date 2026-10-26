@@ -104,12 +104,20 @@ extension FlameCameraTools on CameraComponent {
   ///
   /// - [amplitude]: Maximum shake offset in pixels.
   /// - [controller]: Defines the duration, progression curve, and damping of the shake effect.
+  /// - [frequency]: Optional number of random offsets per second to glide
+  ///   between, for a smooth shake that looks the same at any frame rate.
+  ///   Without it, the shake jumps to a new offset every frame. See
+  ///   [ShakeEffect.frequency].
   ///
   /// Returns a [Future] that completes when the shake finishes or is cancelled.
-  Future<void> shake(double amplitude, EffectController controller) {
+  Future<void> shake(
+    double amplitude,
+    EffectController controller, {
+    double? frequency,
+  }) {
     _removeEffects<ShakeEffect>();
 
-    return _add(ShakeEffect(amplitude, controller));
+    return _add(ShakeEffect(amplitude, controller, frequency: frequency));
   }
 
   /// Smoothly zooms the camera by a relative [value].

@@ -14,7 +14,7 @@ It provides a set of convenient extensions for `CameraComponent` to handle smoot
 
 * **Smooth Follow:** The camera can smoothly follow any target with adjustable stiffness. Supports configurable dead zones and offsets.
 * **Group Follow:** Follow several targets at once, zooming out as they spread apart so that all of them stay in view.
-* **Shake Effect:** Apply a randomized shake effect to the camera or any `PositionProvider`. The shake works on top of following, so the camera keeps tracking its target while it shakes.
+* **Shake Effect:** Apply a randomized shake effect to the camera or any `PositionProvider`. The shake works on top of following, so the camera keeps tracking its target while it shakes. It can jitter every frame or glide smoothly at a set frequency.
 * **Zooming:** Zoom in and out, either relative to the current zoom or to an absolute zoom level.
 * **Rotating:** Rotate the camera by a specified angle or to an absolute angle.
 * **Moving:** Move the camera to a specific position.
@@ -160,8 +160,15 @@ Create a shake effect with specific amplitude and duration:
 await camera.shake(10.0, LinearEffectController(0.5));
 ```
 
+Or let it glide smoothly between random offsets, so that it looks the same at any frame rate:
+
+```dart
+await camera.shake(10.0, LinearEffectController(0.5), frequency: 15);
+```
+
 * `amplitude`: Maximum displacement in pixels along each axis at the start of the effect.
 * `controller`: Defines the duration and progression curve of the shake. Speed-based controllers are not supported.
+* `frequency`: Optional. How many random offsets per second the shake glides between. Without it, the shake jumps to a new offset every frame, so it shakes faster at higher frame rates.
 
 The shake weakens over time and returns the camera to where it would have been without it.
 

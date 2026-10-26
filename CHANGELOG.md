@@ -1,3 +1,9 @@
+## 6.1.0
+
+### Features
+
+* Added `frequency` to `camera.shake` and `ShakeEffect`. With a frequency, the shake glides smoothly between that many random offsets per second, so it looks the same at any frame rate. Without one, it still jumps to a new offset every frame.
+
 ## 6.0.0
 
 ### Breaking changes

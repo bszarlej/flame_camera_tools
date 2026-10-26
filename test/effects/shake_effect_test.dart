@@ -106,9 +106,71 @@ void main() {
       expect(shake.isMounted, isTrue);
       expect(component.position, closeToVector(Vector2(10, 20), epsilon));
     });
+
+    for (final fps in [60, 240]) {
+      testWithFlameGame('with a frequency, glides smoothly at $fps fps',
+          (game) async {
+        final component = PositionComponent(position: Vector2(10, 20));
+        await game.ensureAdd(component);
+
+        component.add(
+          ShakeEffect(10, EffectController(duration: 1), frequency: 10),
+        );
+        // Gliding moves the offset by at most 3 * amplitude * frequency per
+        // second, and fading by amplitude / duration. Jumping to a new random
+        // offset every frame would move it up to 2 * amplitude at once.
+        const maxSpeed = 3 * 10 * 10 + 10.0;
+        var previous = component.position.clone();
+        for (var i = 0; i < fps; i++) {
+          await tick(game, 1 / fps);
+
+          final step = component.position - previous;
+          expect(step.x.abs(), lessThanOrEqualTo(maxSpeed / fps + epsilon));
+          expect(step.y.abs(), lessThanOrEqualTo(maxSpeed / fps + epsilon));
+          expect((component.x - 10).abs(), lessThanOrEqualTo(10 + epsilon));
+          expect((component.y - 20).abs(), lessThanOrEqualTo(10 + epsilon));
+          previous = component.position.clone();
+        }
+
+        await tick(game, 0.1);
+        expect(component.position, closeToVector(Vector2(10, 20), epsilon));
+      });
+    }
+
+    test('asserts that the frequency is positive', () {
+      expect(
+        () => ShakeEffect(10, EffectController(duration: 1), frequency: 0),
+        throwsAssertionError,
+      );
+    });
+
+    testWithFlameGame('with a frequency, asserts in a SequenceEffect',
+        (game) async {
+      final component = PositionComponent();
+      await game.ensureAdd(component);
+
+      component.add(
+        SequenceEffect([
+          ShakeEffect(10, EffectController(duration: 1), frequency: 10),
+        ]),
+      );
+
+      expect(() => game.update(0), throwsAssertionError);
+    });
   });
 
   group('camera shake', () {
+    testWithFlameGame('passes the frequency to the effect', (game) async {
+      final camera = game.camera;
+      camera.shake(10, EffectController(duration: 1), frequency: 12);
+      await tick(game, 0);
+
+      expect(
+        camera.viewfinder.children.whereType<ShakeEffect>().single.frequency,
+        12,
+      );
+    });
+
     testWithFlameGame('keeps following the target mid-shake', (game) async {
       final camera = game.camera;
       final target = PositionComponent();
